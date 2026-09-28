@@ -238,7 +238,7 @@ export const DestinationChanger: React.FC<DestinationChangerProps> = ({
                 onClick={() =>
                   handlePresetSelect(
                     settings?.maps_url ||
-                      'https://maps.google.com/?q=1/208C,+Jeeva+Street,+Chinniyampalayam,+Coimbatore+641062'
+                      'https://www.google.com/maps/place/11%C2%B003\'18.8%22N+77%C2%B003\'52.4%22E/@11.0552243,77.0619922,17z/data=!3m1!4b1!4m4!3m3!8m2!3d11.0552243!4d77.0645671?hl=en&entry=ttu&g_ep=EgoyMDI2MDkyMy4wIKXMDSoASAFQAw%3D%3D'
                   )
                 }
                 className="inline-flex items-center gap-1.5 text-xs bg-blue-50 hover:bg-blue-100 text-blue-800 px-3 py-1.5 rounded-lg border border-blue-200 transition-colors font-medium"

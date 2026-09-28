@@ -681,7 +681,7 @@ const BottomBar: React.FC<{ studio: BusinessSettings; isDark: boolean }> = ({ st
           isDark ? 'text-[#8E899E]' : 'text-[#8A7160]'
         }`}
       >
-        1/208C, Jeeva St, Chinniyampalayam, Coimbatore – 641062 &nbsp;·&nbsp; Mon–Fri: 9–1 &amp; 3–8
+        1/208 C, Jeeva Street, Chinniyampalayam, Coimbatore – 641062 &nbsp;·&nbsp; Mon–Fri: 9–1 &amp; 3–8
       </div>
     </div>
   );

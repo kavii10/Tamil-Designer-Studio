@@ -19,9 +19,9 @@ const DEFAULT_BUSINESS_SETTINGS: BusinessSettings = {
   phone_raw: '917845264168',
   whatsapp_url: 'https://wa.me/917845264168?text=Hello%20Tamil%20Designer%20Studio%2C%20I%20would%20like%20to%20know%20more%20about%20your%20tailoring%20classes%20and%20stitching%20services.',
   instagram_url: 'https://instagram.com/tamil_designer_studio',
-  maps_url: 'https://maps.google.com/?q=1/208C,+Jeeva+Street,+Chinniyampalayam,+Coimbatore+641062',
+  maps_url: 'https://www.google.com/maps/place/11%C2%B003\'18.8%22N+77%C2%B003\'52.4%22E/@11.0552243,77.0619922,17z/data=!3m1!4b1!4m4!3m3!8m2!3d11.0552243!4d77.0645671?hl=en&entry=ttu&g_ep=EgoyMDI2MDkyMy4wIKXMDSoASAFQAw%3D%3D',
   website_url: '',
-  address_line1: '1/208C, Jeeva Street',
+  address_line1: '1/208 C, Jeeva Street',
   address_line2: 'Chinniyampalayam',
   address_city: 'Coimbatore',
   address_pincode: '641062',
@@ -451,6 +451,9 @@ export const db = {
 
   // ==================== BUSINESS SETTINGS ====================
   async getBusinessSettings(): Promise<BusinessSettings> {
+    const CORRECT_MAPS_URL =
+      'https://www.google.com/maps/place/11%C2%B003\'18.8%22N+77%C2%B003\'52.4%22E/@11.0552243,77.0619922,17z/data=!3m1!4b1!4m4!3m3!8m2!3d11.0552243!4d77.0645671?hl=en&entry=ttu&g_ep=EgoyMDI2MDkyMy4wIKXMDSoASAFQAw%3D%3D';
+
     if (isSupabaseConfigured && supabase) {
       try {
         const { data, error } = await supabase
@@ -464,8 +467,27 @@ export const db = {
       }
     }
 
-    return getLocalData<BusinessSettings>(STORAGE_KEYS.SETTINGS, DEFAULT_BUSINESS_SETTINGS);
+    const settings = getLocalData<BusinessSettings>(STORAGE_KEYS.SETTINGS, DEFAULT_BUSINESS_SETTINGS);
+
+    // ── Auto-migration: always force-fix old/wrong maps URL ──
+    const OLD_MAPS_PATTERNS = [
+      'maps.google.com/?q=',
+      'maps/dir/?api=1',
+      'Peelamedu',
+      '641004',
+    ];
+    const needsFix = OLD_MAPS_PATTERNS.some((pattern) =>
+      settings.maps_url?.includes(pattern)
+    ) || settings.maps_url !== CORRECT_MAPS_URL;
+
+    if (needsFix) {
+      settings.maps_url = CORRECT_MAPS_URL;
+      setLocalData(STORAGE_KEYS.SETTINGS, settings);
+    }
+
+    return settings;
   },
+
 
   async updateBusinessSettings(updates: Partial<BusinessSettings>): Promise<BusinessSettings> {
     const updated_at = new Date().toISOString();
