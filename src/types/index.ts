@@ -45,6 +45,8 @@ export interface ServiceItem {
   title: string;
   description: string;
   icon_name: string;
+  image_url?: string;
+  items?: string[];
   is_active: boolean;
   sort_order: number;
 }

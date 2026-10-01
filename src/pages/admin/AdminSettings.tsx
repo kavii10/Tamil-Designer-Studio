@@ -8,13 +8,28 @@ import {
   RotateCcw,
   Sparkles,
   ShieldCheck,
-  Server
+  Server,
+  Lock,
+  KeyRound,
+  Eye,
+  EyeOff,
+  AlertCircle
 } from 'lucide-react';
 import { isSupabaseConfigured } from '../../lib/supabase';
+import { authService } from '../../services/auth';
 
 export const AdminSettings: React.FC = () => {
   const [copiedSchema, setCopiedSchema] = useState(false);
   const [resetSuccess, setResetSuccess] = useState(false);
+
+  // Password Management State
+  const [currentPassword, setCurrentPassword] = useState<string>(() => authService.getCurrentPassword());
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [passError, setPassError] = useState<string | null>(null);
+  const [passSuccess, setPassSuccess] = useState<string | null>(null);
 
   const handleCopySchemaPath = async () => {
     try {
@@ -24,6 +39,41 @@ export const AdminSettings: React.FC = () => {
     } catch {
       setCopiedSchema(true);
       setTimeout(() => setCopiedSchema(false), 2000);
+    }
+  };
+
+  const handlePasswordChange = (e: React.FormEvent) => {
+    e.preventDefault();
+    setPassError(null);
+    setPassSuccess(null);
+
+    const trimmedNew = newPassword.trim();
+    const trimmedConfirm = confirmPassword.trim();
+
+    if (!trimmedNew) {
+      setPassError('Please enter a new password.');
+      return;
+    }
+
+    if (trimmedNew.length < 4) {
+      setPassError('Password must be at least 4 characters long.');
+      return;
+    }
+
+    if (trimmedNew !== trimmedConfirm) {
+      setPassError('New password and confirmation do not match.');
+      return;
+    }
+
+    const res = authService.changePassword(trimmedNew);
+    if (res.success) {
+      setCurrentPassword(trimmedNew);
+      setNewPassword('');
+      setConfirmPassword('');
+      setPassSuccess('Admin password successfully updated! Use this new password on your next login.');
+      setTimeout(() => setPassSuccess(null), 6000);
+    } else {
+      setPassError(res.error || 'Failed to update password.');
     }
   };
 
@@ -46,10 +96,10 @@ export const AdminSettings: React.FC = () => {
       {/* Header */}
       <div className="border-b border-beige-200 pb-5">
         <h1 className="text-2xl font-serif font-bold text-studio-900 tracking-tight">
-          System & Database Settings
+          System & Security Settings
         </h1>
         <p className="text-xs sm:text-sm text-studio-500 mt-1">
-          Infrastructure status, Supabase cloud configuration, and database maintenance.
+          Admin security passcode, database engine configuration, and system maintenance.
         </p>
       </div>
 
@@ -60,7 +110,104 @@ export const AdminSettings: React.FC = () => {
         </div>
       )}
 
-      {/* Database Connection Card */}
+      {/* ── 1. ADMIN PASSWORD MANAGEMENT ── */}
+      <div className="bg-white rounded-2xl border border-beige-200 shadow-premium p-6 sm:p-7 space-y-5">
+        <div className="flex items-center justify-between border-b border-beige-100 pb-3">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-studio-900 text-gold-400 flex items-center justify-center shadow-xs">
+              <KeyRound className="w-4 h-4" />
+            </div>
+            <div>
+              <h3 className="font-serif font-bold text-studio-900 text-base">
+                Admin Password & Access Control
+              </h3>
+              <p className="text-[11px] text-studio-500">
+                Change the passcode required to log in to this admin management console.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-1.5 text-xs text-studio-600 bg-cream-50 px-3 py-1.5 rounded-xl border border-beige-200">
+            <span className="text-studio-500">Current:</span>
+            <span className="font-mono font-bold text-studio-900">
+              {showCurrentPassword ? currentPassword : '••••••••••••'}
+            </span>
+            <button
+              type="button"
+              onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+              className="text-studio-400 hover:text-studio-700 ml-1 p-0.5"
+              title={showCurrentPassword ? 'Hide current password' : 'Show current password'}
+            >
+              {showCurrentPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+            </button>
+          </div>
+        </div>
+
+        {passSuccess && (
+          <div className="p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs rounded-xl flex items-center gap-2 animate-fadeIn">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            <span>{passSuccess}</span>
+          </div>
+        )}
+
+        {passError && (
+          <div className="p-3.5 bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2 animate-fadeIn">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <span>{passError}</span>
+          </div>
+        )}
+
+        <form onSubmit={handlePasswordChange} className="space-y-4 max-w-lg">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-studio-700">
+                New Password
+              </label>
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Enter new password"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-beige-300 text-xs focus:outline-none focus:ring-2 focus:ring-gold-400 bg-cream-50/50 pr-10 text-studio-900"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-studio-400 hover:text-studio-700 p-0.5"
+                >
+                  {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-studio-700">
+                Confirm New Password
+              </label>
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Re-enter new password"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-beige-300 text-xs focus:outline-none focus:ring-2 focus:ring-gold-400 bg-cream-50/50 text-studio-900"
+                required
+              />
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            className="inline-flex items-center gap-2 bg-studio-900 hover:bg-studio-800 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-subtle transition-all active:scale-95"
+          >
+            <Lock className="w-3.5 h-3.5 text-gold-400" />
+            <span>Update Admin Password</span>
+          </button>
+        </form>
+      </div>
+
+      {/* ── 2. DATABASE CONNECTION CARD ── */}
       <div className="bg-white rounded-2xl border border-beige-200 shadow-premium p-6 sm:p-7 space-y-4">
         <div className="flex items-center justify-between border-b border-beige-100 pb-3">
           <div className="flex items-center gap-2">
@@ -131,7 +278,7 @@ VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...`}
         </div>
       </div>
 
-      {/* Security & RLS Overview */}
+      {/* ── 3. SECURITY & RLS OVERVIEW ── */}
       <div className="bg-white rounded-2xl border border-beige-200 shadow-premium p-6 sm:p-7 space-y-3">
         <div className="flex items-center gap-2 border-b border-beige-100 pb-3">
           <ShieldCheck className="w-5 h-5 text-emerald-600" />
@@ -156,7 +303,7 @@ VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...`}
         </ul>
       </div>
 
-      {/* Factory Reset */}
+      {/* ── 4. FACTORY RESET ── */}
       <div className="bg-white rounded-2xl border border-red-200 shadow-subtle p-6 space-y-3">
         <div className="flex items-center justify-between">
           <div>

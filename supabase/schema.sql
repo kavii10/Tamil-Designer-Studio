@@ -63,6 +63,8 @@ CREATE TABLE IF NOT EXISTS public.services (
     title VARCHAR(255) NOT NULL,
     description TEXT,
     icon_name VARCHAR(100) DEFAULT 'Sparkles',
+    image_url TEXT,
+    items JSONB DEFAULT '[]'::jsonb,
     is_active BOOLEAN DEFAULT TRUE,
     sort_order INT DEFAULT 0,
     created_at TIMESTAMPTZ DEFAULT NOW()
@@ -199,13 +201,17 @@ INSERT INTO public.business_settings (
     'Weekdays: 9:00 AM – 1:00 PM & 3:00 PM – 8:00 PM'
 ) ON CONFLICT (id) DO NOTHING;
 
--- 3. Seed Services
-INSERT INTO public.services (title, description, icon_name, sort_order) VALUES
-('Custom Stitching', 'Bespoke tailoring crafted to your precise measurements, personal aesthetics, and comfort.', 'Scissors', 1),
-('Alterations', 'Flawless precision alterations, reshaping, sizing adjustments, and garment restoration.', 'Wrench', 2),
-('Designer Wear', 'Exclusive handcrafted gowns, luxury party wear, ethnic ensembles, and modern couture.', 'Sparkles', 3),
-('Bridal Stitching', 'Opulent bridal blouses, intricate hand aari embroidery, and bespoke wedding couture.', 'Heart', 4),
-('Women’s Wear', 'Everyday chic to festive kurtis, salwars, anarkalis, lehengas, and designer outfits.', 'Shirt', 5)
+-- 3. Seed Services (Poster Stitching Services)
+INSERT INTO public.services (title, description, icon_name, image_url, items, sort_order) VALUES
+('Kids Pattu Lehenga Dress', 'Traditional Pattu Lehenga, Pavadai Sattai & ethnic girls outfits stitched to perfection for festivals and celebrations.', 'Star', '/services/kids_pattu_lehenga.jpg', '["Pattu Pavadai", "Langa Voni", "Lehenga Blouse", "Festive Frocks", "Half Saree Sets"]'::jsonb, 1),
+('Traditional Indian Attires for Kids', 'Classic Indian ethnic wear for children — churidars, salwars, and traditional dresses stitched with care.', 'Sparkles', '/services/kids_traditional_attire.jpg', '["Churidar Sets", "Salwar Kameez", "Kurti & Pant", "Kid''s Ethnic Wear", "School Uniform Stitching"]'::jsonb, 2),
+('Designer Gown & Anarkali Stitching', 'Stunning Anarkali suits, floor-length gowns, and designer party wear crafted with premium fabric.', 'Sparkles', '/services/designer_gown_anarkali.jpg', '["Anarkali Suits", "Long Gowns", "Maxi Variations", "Western Outfits", "Party Wear Gowns"]'::jsonb, 3),
+('Bridal Blouse Designs', 'Exquisite bridal blouses with intricate hand work, silk and brocade fabric stitching for your most special day.', 'Heart', '/services/bridal_blouse_designs.jpg', '["Bridal Silk Blouse", "Wedding Blouse", "Embroidery Blouse", "Stone Work Blouse", "Zardosi Blouse"]'::jsonb, 4),
+('Aari Works & Embroidery', 'Hand-crafted Aari embroidery work on blouses, dupattas, and garments with traditional patterns and modern elegance.', 'Sparkles', '/services/aari_embroidery_works.jpg', '["Aari Thread Work", "Zardosi Work", "Cutdana Work", "Mirror Work", "Maggam Embroidery"]'::jsonb, 5),
+('Blouse & Lehenga Stitching', 'Blouse variations, lehenga skirts, and matching sets with perfect fitting across all fabric types.', 'Scissors', '/services/blouse_lehenga_stitching.jpg', '["Blouse Variations", "Lehenga Skirts", "Kurti Variations", "Pant Variations", "Nightwear"]'::jsonb, 6),
+('Anarkali & Gown Stitching', 'Elegant Anarkali and gown stitching with fine-tuned draping, lining, and precision finishing.', 'Sparkles', '/services/anarkali_gown_stitching.jpg', '["Anarkali Stitching", "Long Gown", "Cape Gown", "Palazzo Suits", "Sharara Sets"]'::jsonb, 7),
+('Trendy & Stylish Blouse Designs', 'Contemporary and trendy blouse designs — backless, collar neck, off-shoulder, and latest pattern blouses.', 'Shirt', '/services/trendy_stylish_blouse.jpg', '["Designer Blouse", "Collar Neck", "Puff Sleeve", "Off-Shoulder", "Backless Blouse"]'::jsonb, 8),
+('Prepleating Services', 'Professional saree prepleating, expert draping, precision pinning, ironing, box & hanger folding, and buffy pleats.', 'Scissors', '/services/saree_draping.jpg', '["Saree Draping", "Saree Prepleating", "Pinig Techniques", "Ironing Method", "Box Folding", "Hanger Folding", "Buffy Pleats"]'::jsonb, 9)
 ON CONFLICT DO NOTHING;
 
 -- 4. Seed Courses

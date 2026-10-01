@@ -47,7 +47,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
     { id: 'qrcodes' as AdminTab, label: 'QR Codes', icon: QrCode },
     { id: 'profile' as AdminTab, label: 'Business Profile', icon: Store },
     { id: 'courses' as AdminTab, label: 'Courses & Academy', icon: GraduationCap },
-    { id: 'services' as AdminTab, label: 'Tailoring Services', icon: Scissors },
+    { id: 'services' as AdminTab, label: 'Stitching Services', icon: Scissors },
     { id: 'analytics' as AdminTab, label: 'Scan Analytics', icon: BarChart3 },
     { id: 'settings' as AdminTab, label: 'Settings', icon: Settings },
   ];
@@ -161,6 +161,15 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
               Live
             </span>
           </a>
+
+          <button
+            type="button"
+            onClick={onLogout}
+            className="w-full flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs text-rose-300 hover:text-rose-100 bg-rose-950/40 hover:bg-rose-950/70 border border-rose-900/50 transition-colors font-medium text-left"
+          >
+            <LogOut className="w-3.5 h-3.5 text-rose-400" />
+            <span>Lock &amp; Logout</span>
+          </button>
         </div>
       </aside>
 

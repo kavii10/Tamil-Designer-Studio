@@ -1,4 +1,4 @@
-import { supabase, isSupabaseConfigured } from '../lib/supabase';
+﻿import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import {
   QRCodeItem,
   BusinessSettings,
@@ -42,49 +42,98 @@ const DEFAULT_QR_CODES: QRCodeItem[] = [
   },
 ];
 
-const DEFAULT_SERVICES: ServiceItem[] = [
+export const DEFAULT_SERVICES: ServiceItem[] = [
   {
     id: 's1',
-    title: 'Custom Stitching',
-    description: 'Bespoke tailoring crafted to your precise measurements, personal aesthetics, and comfort.',
-    icon_name: 'Scissors',
+    title: 'Kids Pattu Lehenga Dress',
+    description: 'Traditional Pattu Lehenga, Pavadai Sattai & ethnic girls outfits stitched to perfection for festivals and celebrations.',
+    icon_name: 'Star',
+    image_url: '/services/kids_pattu_lehenga.jpg',
+    items: ['Pattu Pavadai', 'Langa Voni', 'Lehenga Blouse', 'Festive Frocks', 'Half Saree Sets'],
     is_active: true,
     sort_order: 1,
   },
   {
     id: 's2',
-    title: 'Alterations',
-    description: 'Flawless precision alterations, reshaping, sizing adjustments, and garment restoration.',
-    icon_name: 'Wrench',
+    title: 'Traditional Indian Attires for Kids',
+    description: 'Classic Indian ethnic wear for children — churidars, salwars, and traditional dresses stitched with care.',
+    icon_name: 'Sparkles',
+    image_url: '/services/kids_traditional_attire.jpg',
+    items: ['Churidar Sets', 'Salwar Kameez', 'Kurti & Pant', "Kid's Ethnic Wear", 'School Uniform Stitching'],
     is_active: true,
     sort_order: 2,
   },
   {
     id: 's3',
-    title: 'Designer Wear',
-    description: 'Exclusive handcrafted gowns, luxury party wear, ethnic ensembles, and modern couture.',
+    title: 'Designer Gown & Anarkali Stitching',
+    description: 'Stunning Anarkali suits, floor-length gowns, and designer party wear crafted with premium fabric.',
     icon_name: 'Sparkles',
+    image_url: '/services/designer_gown_anarkali.jpg',
+    items: ['Anarkali Suits', 'Long Gowns', 'Maxi Variations', 'Western Outfits', 'Party Wear Gowns'],
     is_active: true,
     sort_order: 3,
   },
   {
     id: 's4',
-    title: 'Bridal Stitching',
-    description: 'Opulent bridal blouses, intricate hand aari embroidery, and bespoke wedding couture.',
+    title: 'Bridal Blouse Designs',
+    description: 'Exquisite bridal blouses with intricate hand work, silk and brocade fabric stitching for your most special day.',
     icon_name: 'Heart',
+    image_url: '/services/bridal_blouse_designs.jpg',
+    items: ['Bridal Silk Blouse', 'Wedding Blouse', 'Embroidery Blouse', 'Stone Work Blouse', 'Zardosi Blouse'],
     is_active: true,
     sort_order: 4,
   },
   {
     id: 's5',
-    title: 'Women’s Wear',
-    description: 'Everyday chic to festive kurtis, salwars, anarkalis, lehengas, and designer outfits.',
-    icon_name: 'Shirt',
+    title: 'Aari Works & Embroidery',
+    description: 'Hand-crafted Aari embroidery work on blouses, dupattas, and garments with traditional patterns and modern elegance.',
+    icon_name: 'Sparkles',
+    image_url: '/services/aari_embroidery_works.jpg',
+    items: ['Aari Thread Work', 'Zardosi Work', 'Cutdana Work', 'Mirror Work', 'Maggam Embroidery'],
     is_active: true,
     sort_order: 5,
   },
+  {
+    id: 's6',
+    title: 'Blouse & Lehenga Stitching',
+    description: 'Blouse variations, lehenga skirts, and matching sets with perfect fitting across all fabric types.',
+    icon_name: 'Scissors',
+    image_url: '/services/blouse_lehenga_stitching.jpg',
+    items: ['Blouse Variations', 'Lehenga Skirts', 'Kurti Variations', 'Pant Variations', 'Nightwear'],
+    is_active: true,
+    sort_order: 6,
+  },
+  {
+    id: 's7',
+    title: 'Anarkali & Gown Stitching',
+    description: 'Elegant Anarkali and gown stitching with fine-tuned draping, lining, and precision finishing.',
+    icon_name: 'Sparkles',
+    image_url: '/services/anarkali_gown_stitching.jpg',
+    items: ['Anarkali Stitching', 'Long Gown', 'Cape Gown', 'Palazzo Suits', 'Sharara Sets'],
+    is_active: true,
+    sort_order: 7,
+  },
+  {
+    id: 's8',
+    title: 'Trendy & Stylish Blouse Designs',
+    description: 'Contemporary and trendy blouse designs — backless, collar neck, off-shoulder, and latest pattern blouses.',
+    icon_name: 'Shirt',
+    image_url: '/services/trendy_stylish_blouse.jpg',
+    items: ['Designer Blouse', 'Collar Neck', 'Puff Sleeve', 'Off-Shoulder', 'Backless Blouse'],
+    is_active: true,
+    sort_order: 8,
+  },
+  {
+    id: 's9',
+    title: 'Prepleating Services',
+    description: 'Professional saree prepleating, expert draping, precision pinning, ironing, box & hanger folding, and buffy pleats.',
+    icon_name: 'Scissors',
+    image_url: '/services/saree_draping.jpg',
+    items: ['Saree Draping', 'Saree Prepleating', 'Pinig Techniques', 'Ironing Method', 'Box Folding', 'Hanger Folding', 'Buffy Pleats'],
+    is_active: true,
+    sort_order: 9,
+  },
 ];
-
 const DEFAULT_COURSES: CourseItem[] = [
   {
     id: 'c1',
@@ -244,6 +293,7 @@ export const db = {
 
   async updateQRDestination(id: string, newDestination: string): Promise<QRCodeItem> {
     const updated_at = new Date().toISOString();
+    let updatedItem: QRCodeItem | null = null;
 
     if (isSupabaseConfigured && supabase) {
       try {
@@ -253,7 +303,9 @@ export const db = {
           .eq('id', id)
           .select()
           .single();
-        if (!error && data) return data as QRCodeItem;
+        if (!error && data) {
+          updatedItem = data as QRCodeItem;
+        }
       } catch (err) {
         console.warn('Supabase update failed, saving locally:', err);
       }
@@ -261,10 +313,25 @@ export const db = {
 
     const items = getLocalData<QRCodeItem[]>(STORAGE_KEYS.QR_CODES, DEFAULT_QR_CODES);
     const index = items.findIndex((q) => q.id === id);
-    if (index === -1) throw new Error('QR Code not found');
+    if (index === -1) {
+      const fallbackItem: QRCodeItem = updatedItem || {
+        id,
+        name: 'Tamil Designer Studio — Visiting Card QR',
+        slug: 'tamil-designer-studio',
+        destination_url: newDestination,
+        is_active: true,
+        scan_count: 0,
+        created_at: updated_at,
+        updated_at,
+      };
+      items.push(fallbackItem);
+      setLocalData(STORAGE_KEYS.QR_CODES, items);
+      return fallbackItem;
+    }
 
     items[index] = {
       ...items[index],
+      ...(updatedItem || {}),
       destination_url: newDestination,
       updated_at,
     };
@@ -451,9 +518,6 @@ export const db = {
 
   // ==================== BUSINESS SETTINGS ====================
   async getBusinessSettings(): Promise<BusinessSettings> {
-    const CORRECT_MAPS_URL =
-      'https://www.google.com/maps/place/11%C2%B003\'18.8%22N+77%C2%B003\'52.4%22E/@11.0552243,77.0619922,17z/data=!3m1!4b1!4m4!3m3!8m2!3d11.0552243!4d77.0645671?hl=en&entry=ttu&g_ep=EgoyMDI2MDkyMy4wIKXMDSoASAFQAw%3D%3D';
-
     if (isSupabaseConfigured && supabase) {
       try {
         const { data, error } = await supabase
@@ -461,54 +525,64 @@ export const db = {
           .select('*')
           .limit(1)
           .single();
-        if (!error && data) return data as BusinessSettings;
+        if (!error && data) {
+          // Sync to localStorage
+          setLocalData(STORAGE_KEYS.SETTINGS, data);
+          return data as BusinessSettings;
+        }
       } catch (err) {
         console.warn('Supabase fetch failed:', err);
       }
     }
 
     const settings = getLocalData<BusinessSettings>(STORAGE_KEYS.SETTINGS, DEFAULT_BUSINESS_SETTINGS);
-
-    // ── Auto-migration: always force-fix old/wrong maps URL ──
-    const OLD_MAPS_PATTERNS = [
-      'maps.google.com/?q=',
-      'maps/dir/?api=1',
-      'Peelamedu',
-      '641004',
-    ];
-    const needsFix = OLD_MAPS_PATTERNS.some((pattern) =>
-      settings.maps_url?.includes(pattern)
-    ) || settings.maps_url !== CORRECT_MAPS_URL;
-
-    if (needsFix) {
-      settings.maps_url = CORRECT_MAPS_URL;
-      setLocalData(STORAGE_KEYS.SETTINGS, settings);
-    }
-
     return settings;
   },
 
-
   async updateBusinessSettings(updates: Partial<BusinessSettings>): Promise<BusinessSettings> {
     const updated_at = new Date().toISOString();
+    let result: BusinessSettings | null = null;
 
     if (isSupabaseConfigured && supabase) {
       try {
-        const { data, error } = await supabase
+        // Try update first
+        const { data: updateData, error: updateError } = await supabase
           .from('business_settings')
           .update({ ...updates, updated_at })
           .eq('id', DEFAULT_BUSINESS_SETTINGS.id)
           .select()
           .single();
-        if (!error && data) return data as BusinessSettings;
+
+        if (!updateError && updateData) {
+          result = updateData as BusinessSettings;
+        } else {
+          // If no row exists yet with that ID, upsert it
+          const { data: upsertData, error: upsertError } = await supabase
+            .from('business_settings')
+            .upsert({ ...DEFAULT_BUSINESS_SETTINGS, ...updates, updated_at })
+            .select()
+            .single();
+
+          if (!upsertError && upsertData) {
+            result = upsertData as BusinessSettings;
+          } else if (upsertError) {
+            console.warn('Supabase upsert error:', upsertError);
+          }
+        }
       } catch (err) {
         console.warn('Supabase settings update failed:', err);
       }
     }
 
     const current = getLocalData<BusinessSettings>(STORAGE_KEYS.SETTINGS, DEFAULT_BUSINESS_SETTINGS);
-    const updated = { ...current, ...updates, updated_at };
+    const updated = { ...current, ...(result || updates), updated_at };
     setLocalData(STORAGE_KEYS.SETTINGS, updated);
+
+    // Dispatch event to inform live UI components
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('tds_settings_updated', { detail: updated }));
+    }
+
     return updated;
   },
 
@@ -519,18 +593,49 @@ export const db = {
         let q = supabase.from('services').select('*').order('sort_order', { ascending: true });
         if (activeOnly) q = q.eq('is_active', true);
         const { data, error } = await q;
-        if (!error && data) return data as ServiceItem[];
+        if (!error && data && data.length > 0) {
+          const isOldEmptySeed = data.length <= 5 && !data.some((s: any) => s.image_url);
+          if (!isOldEmptySeed) {
+            if (!activeOnly) {
+              setLocalData(STORAGE_KEYS.SERVICES, data);
+            }
+            return data as ServiceItem[];
+          }
+        }
       } catch (err) {
         console.warn('Supabase services fetch failed:', err);
       }
     }
 
-    const items = getLocalData<ServiceItem[]>(STORAGE_KEYS.SERVICES, DEFAULT_SERVICES);
+    let items = getLocalData<ServiceItem[]>(STORAGE_KEYS.SERVICES, DEFAULT_SERVICES);
+    if (items.length <= 5 || !items.some((s) => s.image_url)) {
+      items = DEFAULT_SERVICES;
+      setLocalData(STORAGE_KEYS.SERVICES, items);
+    }
     return activeOnly ? items.filter((s) => s.is_active) : items;
   },
 
   async saveServices(services: ServiceItem[]): Promise<ServiceItem[]> {
     setLocalData(STORAGE_KEYS.SERVICES, services);
+
+    if (isSupabaseConfigured && supabase) {
+      try {
+        // Upsert services by ID to preserve database integrity
+        const { error } = await supabase
+          .from('services')
+          .upsert(services, { onConflict: 'id' });
+        if (error) {
+          console.warn('Supabase saveServices error:', error);
+        }
+      } catch (err) {
+        console.warn('Supabase saveServices failed:', err);
+      }
+    }
+
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('tds_services_updated', { detail: services }));
+    }
+
     return services;
   },
 
@@ -541,7 +646,12 @@ export const db = {
         let q = supabase.from('courses').select('*').order('sort_order', { ascending: true });
         if (activeOnly) q = q.eq('is_active', true);
         const { data, error } = await q;
-        if (!error && data) return data as CourseItem[];
+        if (!error && data && data.length > 0) {
+          if (!activeOnly) {
+            setLocalData(STORAGE_KEYS.COURSES, data);
+          }
+          return data as CourseItem[];
+        }
       } catch (err) {
         console.warn('Supabase courses fetch failed:', err);
       }
@@ -553,6 +663,24 @@ export const db = {
 
   async saveCourses(courses: CourseItem[]): Promise<CourseItem[]> {
     setLocalData(STORAGE_KEYS.COURSES, courses);
+
+    if (isSupabaseConfigured && supabase) {
+      try {
+        const { error } = await supabase
+          .from('courses')
+          .upsert(courses, { onConflict: 'id' });
+        if (error) {
+          console.warn('Supabase saveCourses error:', error);
+        }
+      } catch (err) {
+        console.warn('Supabase saveCourses failed:', err);
+      }
+    }
+
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('tds_courses_updated', { detail: courses }));
+    }
+
     return courses;
   },
 

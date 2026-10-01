@@ -17,6 +17,7 @@ import {
   TrendingUp,
   Heart,
   ChevronRight,
+  Sparkles,
 } from 'lucide-react';
 import { InstagramIcon } from '../components/icons/InstagramIcon';
 import { db } from '../services/db';
@@ -27,7 +28,11 @@ import { CourseCard } from '../components/studio/CourseCard';
 /* ═══════════════════════════════════════════════
    SPLASH SCREEN (Clean Large Logo, No Star Above)
 ═══════════════════════════════════════════════ */
-const SplashScreen: React.FC<{ onDone: () => void; isDark: boolean }> = ({ onDone, isDark }) => {
+const SplashScreen: React.FC<{ onDone: () => void; isDark: boolean; studio?: BusinessSettings | null }> = ({
+  onDone,
+  isDark,
+  studio,
+}) => {
   const [phase, setPhase] = useState<'enter' | 'show' | 'exit'>('enter');
   const [progress, setProgress] = useState(0);
 
@@ -99,7 +104,7 @@ const SplashScreen: React.FC<{ onDone: () => void; isDark: boolean }> = ({ onDon
               isDark ? 'text-[#FAF6EE]' : 'text-[#2A170E]'
             }`}
           >
-            Tamil Designer Studio
+            {studio?.business_name || 'Tamil Designer Studio'}
           </p>
           <div
             className={`inline-block px-3 py-1 rounded-full border text-[10px] sm:text-xs font-bold uppercase tracking-widest ${
@@ -108,14 +113,14 @@ const SplashScreen: React.FC<{ onDone: () => void; isDark: boolean }> = ({ onDon
                 : 'bg-[#EEDBBF] border-[#D9B562] text-[#6B4715]'
             }`}
           >
-            School of Fashion Design &amp; Tailoring
+            {studio?.subtitle || 'School of Fashion Design & Tailoring'}
           </div>
           <p
             className={`text-xs font-serif italic pt-1 ${
               isDark ? 'text-[#A8A3B8]' : 'text-[#87654C]'
             }`}
           >
-            "Wear Dreams, Not Just Clothes"
+            "{studio?.tagline || 'Wear Dreams, Not Just Clothes.'}"
           </p>
         </div>
 
@@ -229,7 +234,7 @@ const OverviewSection: React.FC<{
                 : 'bg-[#EEDBBF] border-[#D9B562] text-[#634215]'
             }`}
           >
-            School of Fashion Design &amp; Tailoring
+            {studio.subtitle || 'School of Fashion Design & Tailoring'}
           </div>
 
           <h2
@@ -237,7 +242,7 @@ const OverviewSection: React.FC<{
               isDark ? 'text-[#FDFCF9]' : 'text-[#26150D]'
             }`}
           >
-            Tamil Designer Studio
+            {studio.business_name || 'Tamil Designer Studio'}
           </h2>
 
           <p
@@ -245,7 +250,7 @@ const OverviewSection: React.FC<{
               isDark ? 'text-[#E8BE56]' : 'text-[#9B7120]'
             }`}
           >
-            Learn · Create · Master
+            {studio.quote || 'Learn · Create · Master'}
           </p>
 
           <p
@@ -253,7 +258,8 @@ const OverviewSection: React.FC<{
               isDark ? 'text-[#D1CADB]' : 'text-[#5C4535]'
             }`}
           >
-            Turn your passion for fashion into a profession. We offer certified, hands-on courses for beginners to advanced designers, along with bespoke custom tailoring.
+            {studio.tagline ||
+              'Turn your passion for fashion into a profession. We offer certified, hands-on courses for beginners to advanced designers, along with bespoke custom tailoring.'}
           </p>
 
           {/* Key Metrics */}
@@ -439,9 +445,9 @@ const OverviewSection: React.FC<{
           }`}
         >
           <TrendingUp className={`w-4 h-4 ${isDark ? 'text-[#E8BE56]' : 'text-[#B8861B]'}`} />
-          Why Choose Tamil Designer Studio
+          Why Choose {studio.business_name || 'Tamil Designer Studio'}
         </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {features.map(({ icon: Icon, label, desc }) => (
             <div
               key={label}
@@ -546,11 +552,11 @@ const OverviewSection: React.FC<{
             isDark ? 'text-[#8E899E]' : 'text-[#7C6556]'
           }`}
         >
-          Monday to Friday · Regular &amp; Weekend batches available
+          {studio.timings_weekdays || 'Monday to Friday · Regular & Weekend batches available'}
         </p>
       </div>
 
-      {/* ── Custom Stitching Services Preview ── */}
+      {/* ── Stitching Services Preview ── */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -560,7 +566,7 @@ const OverviewSection: React.FC<{
                 isDark ? 'text-[#A7A2B8]' : 'text-[#7C6556]'
               }`}
             >
-              Custom Stitching &amp; Tailoring Services
+              Stitching Services
             </h3>
           </div>
           <button
@@ -569,30 +575,38 @@ const OverviewSection: React.FC<{
               isDark ? 'text-[#E8BE56]' : 'text-[#8C6010]'
             }`}
           >
-            <span>View All</span>
+            <span>View All ({services.length})</span>
             <ChevronRight className="w-3.5 h-3.5" />
           </button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {services.slice(0, 4).map((service) => (
             <div
               key={service.id}
               onClick={onSelectServices}
-              className={`cursor-pointer rounded-2xl border p-3.5 flex items-center gap-3 shadow-sm hover:shadow-md transition-all ${
+              className={`cursor-pointer rounded-2xl border p-3 flex items-center gap-3.5 shadow-sm hover:shadow-md transition-all ${
                 isDark
                   ? 'bg-[#171622] border-[#2C293A]'
                   : 'bg-white border-[#E8DAC2] hover:border-[#D9B562]'
               }`}
             >
               <div
-                className={`w-9 h-9 rounded-xl border flex items-center justify-center shrink-0 ${
-                  isDark
-                    ? 'bg-gradient-to-br from-[#252233] to-[#1A1824] border-[#3C384D] text-[#E8BE56]'
-                    : 'bg-gradient-to-br from-[#FAF5EB] to-[#F3E7D3] border-[#E0D0B6] text-[#B8861B]'
+                className={`w-12 h-12 rounded-xl overflow-hidden border shrink-0 relative shadow-sm ${
+                  isDark ? 'border-[#3C384D] bg-[#252233]' : 'border-[#E0D0B6] bg-[#FAF5EB]'
                 }`}
               >
-                <CheckCircle2 className="w-4 h-4" />
+                {service.image_url ? (
+                  <img
+                    src={service.image_url}
+                    alt={service.title}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <Scissors className={`w-5 h-5 ${isDark ? 'text-[#E8BE56]' : 'text-[#B8861B]'}`} />
+                  </div>
+                )}
               </div>
               <div className="flex-1 min-w-0">
                 <p
@@ -662,7 +676,7 @@ const BottomBar: React.FC<{ studio: BusinessSettings; isDark: boolean }> = ({ st
         isDark ? 'bg-[#12111A]/95 border-[#2A2838]' : 'bg-white/95 border-[#E8DAC2]'
       }`}
     >
-      <div className="max-w-4xl mx-auto px-4 py-2 grid grid-cols-4 gap-1">
+      <div className="max-w-7xl mx-auto px-4 sm:px-8 py-2.5 grid grid-cols-4 gap-2">
         {actions.map(({ href, icon: Icon, label, color, activeBg }) => (
           <a
             key={label}
@@ -681,7 +695,7 @@ const BottomBar: React.FC<{ studio: BusinessSettings; isDark: boolean }> = ({ st
           isDark ? 'text-[#8E899E]' : 'text-[#8A7160]'
         }`}
       >
-        1/208 C, Jeeva Street, Chinniyampalayam, Coimbatore – 641062 &nbsp;·&nbsp; Mon–Fri: 9–1 &amp; 3–8
+        {studio.address_line1}, {studio.address_line2}, {studio.address_city} – {studio.address_pincode} &nbsp;·&nbsp; {studio.timings_weekdays}
       </div>
     </div>
   );
@@ -757,18 +771,75 @@ export const PublicStudioPage: React.FC = () => {
       }
     }
     loadData();
+
+    // Live update listeners when admin updates data
+    const handleSettingsUpdate = (e: Event) => {
+      const customEvent = e as CustomEvent<BusinessSettings>;
+      if (customEvent.detail) setSettings(customEvent.detail);
+    };
+    const handleServicesUpdate = (e: Event) => {
+      const customEvent = e as CustomEvent<ServiceItem[]>;
+      if (customEvent.detail) setServices(customEvent.detail.filter((s) => s.is_active));
+    };
+    const handleCoursesUpdate = (e: Event) => {
+      const customEvent = e as CustomEvent<CourseItem[]>;
+      if (customEvent.detail) {
+        setCourses(
+          customEvent.detail.filter(
+            (c) => c.is_active && c.id !== 'c5' && !c.title.toLowerCase().includes('boutique business')
+          )
+        );
+      }
+    };
+
+    // Cross-tab storage change listener
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'tds_business_settings' && e.newValue) {
+        try {
+          setSettings(JSON.parse(e.newValue));
+        } catch {}
+      }
+      if (e.key === 'tds_services' && e.newValue) {
+        try {
+          const parsed = JSON.parse(e.newValue);
+          setServices(parsed.filter((s: ServiceItem) => s.is_active));
+        } catch {}
+      }
+      if (e.key === 'tds_courses' && e.newValue) {
+        try {
+          const parsed = JSON.parse(e.newValue);
+          setCourses(
+            parsed.filter(
+              (c: CourseItem) => c.is_active && c.id !== 'c5' && !c.title.toLowerCase().includes('boutique business')
+            )
+          );
+        } catch {}
+      }
+    };
+
+    window.addEventListener('tds_settings_updated', handleSettingsUpdate);
+    window.addEventListener('tds_services_updated', handleServicesUpdate);
+    window.addEventListener('tds_courses_updated', handleCoursesUpdate);
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('tds_settings_updated', handleSettingsUpdate);
+      window.removeEventListener('tds_services_updated', handleServicesUpdate);
+      window.removeEventListener('tds_courses_updated', handleCoursesUpdate);
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
 
   if (loading || showSplash) {
-    return <SplashScreen onDone={() => setShowSplash(false)} isDark={isDark} />;
+    return <SplashScreen onDone={() => setShowSplash(false)} isDark={isDark} studio={settings} />;
   }
 
   const studio = settings!;
 
-  const tabs: { key: 'overview' | 'services' | 'courses'; label: string; icon: React.ElementType }[] = [
-    { key: 'overview', label: 'Overview', icon: Star },
-    { key: 'services', label: `Services (${services.length})`, icon: Scissors },
-    { key: 'courses', label: `Courses (${courses.length})`, icon: GraduationCap },
+  const tabs: { key: 'overview' | 'services' | 'courses'; label: string }[] = [
+    { key: 'overview', label: 'Overview' },
+    { key: 'services', label: `Stitching Services (${services.length})` },
+    { key: 'courses', label: `Courses (${courses.length})` },
   ];
 
   return (
@@ -783,7 +854,7 @@ export const PublicStudioPage: React.FC = () => {
           isDark ? 'bg-[#15151F]/95 border-[#2A2838]' : 'bg-white/95 border-[#E8DAC2]'
         }`}
       >
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-2.5 flex items-center justify-between gap-3">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 py-3 flex items-center justify-between gap-4">
 
           {/* Logo on Left */}
           <div className="flex items-center gap-3">
@@ -806,14 +877,14 @@ export const PublicStudioPage: React.FC = () => {
                   isDark ? 'text-[#FAF6EE]' : 'text-[#2A170E]'
                 }`}
               >
-                Tamil Designer Studio
+                {studio.business_name || 'Tamil Designer Studio'}
               </span>
               <span
                 className={`text-[10px] font-semibold uppercase tracking-wider hidden sm:block ${
                   isDark ? 'text-[#E8BE56]' : 'text-[#8C6010]'
                 }`}
               >
-                School of Fashion Design &amp; Tailoring
+                {studio.subtitle || 'School of Fashion Design & Tailoring'}
               </span>
             </div>
           </div>
@@ -845,13 +916,13 @@ export const PublicStudioPage: React.FC = () => {
           isDark ? 'bg-[#0E0E14]/95 border-[#2A2838]' : 'bg-[#FAF5EC]/95 border-[#E8DAC2]'
         }`}
       >
-        <div className="max-w-4xl mx-auto px-4 sm:px-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8">
           <div className="flex">
-            {tabs.map(({ key, label, icon: Icon }) => (
+            {tabs.map(({ key, label }) => (
               <button
                 key={key}
                 onClick={() => setActiveTab(key)}
-                className={`flex-1 flex items-center justify-center gap-1.5 py-3.5 text-xs sm:text-sm font-bold tracking-wide transition-all border-b-2 relative ${
+                className={`flex-1 flex items-center justify-center py-3.5 text-xs sm:text-sm font-bold tracking-wide transition-all border-b-2 relative ${
                   activeTab === key
                     ? isDark
                       ? 'border-[#D9A73A] text-[#FAF6EE]'
@@ -861,9 +932,6 @@ export const PublicStudioPage: React.FC = () => {
                       : 'border-transparent text-[#7C6556] hover:text-[#2A170E]'
                 }`}
               >
-                <Icon
-                  className={`w-4 h-4 shrink-0 ${isDark ? 'text-[#E8BE56]' : 'text-[#B8861B]'}`}
-                />
                 <span>{label}</span>
                 {activeTab === key && (
                   <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-10 h-0.5 bg-[#D9A73A] rounded-full" />
@@ -875,7 +943,7 @@ export const PublicStudioPage: React.FC = () => {
       </div>
 
       {/* ── Main Content Container ── */}
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+      <main className="max-w-7xl mx-auto px-4 sm:px-8 py-8 space-y-8">
 
         {/* 1. OVERVIEW TAB */}
         {activeTab === 'overview' && (
@@ -888,39 +956,105 @@ export const PublicStudioPage: React.FC = () => {
           />
         )}
 
-        {/* 2. SERVICES TAB */}
+        {/* 2. STITCHING SERVICES TAB */}
         {activeTab === 'services' && (
-          <section className="space-y-4 animate-fadeIn">
+          <section className="space-y-6 animate-fadeIn">
+            {/* Header with Poster Tagline */}
             <div
-              className={`flex items-center justify-between border-b pb-3 ${
-                isDark ? 'border-[#2A2838]' : 'border-[#E8DAC2]'
+              className={`rounded-3xl p-6 sm:p-8 border shadow-sm text-center space-y-3 relative overflow-hidden ${
+                isDark
+                  ? 'bg-gradient-to-br from-[#1C1A27] via-[#14131D] to-[#0D0C13] border-[#383348]'
+                  : 'bg-gradient-to-br from-[#FFFDF9] via-[#FAF3E8] to-[#F2E5D0] border-[#E8DAC2]'
               }`}
             >
-              <div>
-                <h3
-                  className={`text-xl sm:text-2xl font-serif font-bold ${
-                    isDark ? 'text-[#FAF6EE]' : 'text-[#2A170E]'
-                  }`}
-                >
-                  Bespoke Stitching &amp; Designer Services
-                </h3>
-                <p
-                  className={`text-xs mt-0.5 ${
-                    isDark ? 'text-[#8E899E]' : 'text-[#7C6556]'
-                  }`}
-                >
-                  High-precision craftsmanship tailored to your unique elegance
-                </p>
+              <div
+                className={`inline-block px-3 py-1 rounded-full border text-[10px] sm:text-xs font-bold uppercase tracking-widest ${
+                  isDark
+                    ? 'bg-gold-500/15 border-gold-400/30 text-gold-300'
+                    : 'bg-[#EEDBBF] border-[#D9B562] text-[#634215]'
+                }`}
+              >
+                Custom Stitching Services
               </div>
-              <Scissors
-                className={`w-6 h-6 shrink-0 ${isDark ? 'text-[#E8BE56]' : 'text-[#B8861B]'}`}
-              />
+
+              <h3
+                className={`text-2xl sm:text-3xl font-serif font-bold ${
+                  isDark ? 'text-[#FAF6EE]' : 'text-[#2A170E]'
+                }`}
+              >
+                Stitching Services
+              </h3>
+
+              <p
+                className={`text-xs sm:text-sm font-semibold tracking-wider uppercase ${
+                  isDark ? 'text-[#E8BE56]' : 'text-[#9B7120]'
+                }`}
+              >
+                Your Design &bull; Our Stitching &bull; Perfect Fit
+              </p>
+
+              {/* 4 Pillars Badges from Poster */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 max-w-xl mx-auto">
+                {[
+                  'Perfect Stitching',
+                  'Trendy Designs',
+                  'Quality Work',
+                  'All Size Fittings',
+                ].map((label) => (
+                  <div
+                    key={label}
+                    className={`rounded-xl border py-2 px-2.5 flex items-center justify-center text-[11px] font-bold shadow-2xs ${
+                      isDark
+                        ? 'bg-[#252233]/70 border-[#3C384D] text-[#E8DAC2]'
+                        : 'bg-white/80 border-[#E5D7C3] text-[#5C3F18]'
+                    }`}
+                  >
+                    <span className="truncate">{label}</span>
+                  </div>
+                ))}
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Services Cards Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {services.map((service) => (
                 <ServiceCard key={service.id} service={service} isDark={isDark} />
               ))}
+            </div>
+
+            {/* Custom Inquiry CTA Banner */}
+            <div
+              className={`rounded-2xl p-5 border text-center space-y-3 shadow-sm ${
+                isDark
+                  ? 'bg-gradient-to-r from-[#201D2D] to-[#171622] border-[#383348]'
+                  : 'bg-gradient-to-r from-[#FAF5EB] to-[#F3E7D3] border-[#E8DAC2]'
+              }`}
+            >
+              <h4
+                className={`font-serif font-bold text-base sm:text-lg ${
+                  isDark ? 'text-[#FAF6EE]' : 'text-[#2A170E]'
+                }`}
+              >
+                Have a Custom Design or Fabric in Mind?
+              </h4>
+              <p
+                className={`text-xs max-w-md mx-auto ${
+                  isDark ? 'text-[#A7A2B8]' : 'text-[#6B5344]'
+                }`}
+              >
+                Send your reference photos or measurements directly to our master designer on WhatsApp for quick estimates and consultations.
+              </p>
+              <div>
+                <a
+                  href={studio.whatsapp_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 bg-gradient-to-r from-[#D9A73A] via-[#E8BE56] to-[#C9962A] text-[#160E07] text-xs font-bold px-6 py-2.5 rounded-xl shadow-md hover:brightness-105 active:scale-95 transition-all"
+                >
+                  <MessageCircle className="w-4 h-4 fill-current" />
+                  <span>Discuss Custom Stitching</span>
+                </a>
+              </div>
             </div>
           </section>
         )}
@@ -954,7 +1088,7 @@ export const PublicStudioPage: React.FC = () => {
               />
             </div>
 
-            <div className="grid grid-cols-1 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {courses.map((course) => (
                 <CourseCard
                   key={course.id}

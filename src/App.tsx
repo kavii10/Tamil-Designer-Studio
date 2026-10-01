@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { PublicStudioPage } from './pages/PublicStudioPage';
 import { QRRedirectPage } from './pages/QRRedirectPage';
 import { ErrorFallbackPage } from './pages/ErrorFallbackPage';
+import { AdminLogin } from './pages/admin/AdminLogin';
 import { AdminLayout, AdminTab } from './pages/admin/AdminLayout';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { AdminQRCodes } from './pages/admin/AdminQRCodes';
@@ -10,10 +11,12 @@ import { AdminCourses } from './pages/admin/AdminCourses';
 import { AdminServices } from './pages/admin/AdminServices';
 import { AdminAnalytics } from './pages/admin/AdminAnalytics';
 import { AdminSettings } from './pages/admin/AdminSettings';
+import { authService } from './services/auth';
 
 export const App: React.FC = () => {
   const [currentPath, setCurrentPath] = useState<string>(window.location.pathname);
   const [adminTab, setAdminTab] = useState<AdminTab>('dashboard');
+  const [authKey, setAuthKey] = useState<number>(0);
 
   useEffect(() => {
     const handlePopState = () => {
@@ -41,13 +44,31 @@ export const App: React.FC = () => {
     return <ErrorFallbackPage />;
   }
 
-  // 3. ADMIN PORTAL ROUTE: /admin (Direct Access - Password Removed as requested)
+  // 3. ADMIN PORTAL ROUTE: /admin (Protected with password t@mil_designer_studio)
   if (currentPath.startsWith('/admin')) {
+    const isAuthed = authService.isAuthenticated();
+
+    if (!isAuthed) {
+      return (
+        <AdminLogin
+          onSuccess={() => {
+            setAuthKey((k) => k + 1);
+            navigate('/admin');
+          }}
+        />
+      );
+    }
+
     return (
       <AdminLayout
+        key={`admin-${authKey}`}
         currentTab={adminTab}
         onTabChange={(tab) => setAdminTab(tab)}
-        onLogout={() => navigate('/tamil-designer-studio')}
+        onLogout={() => {
+          authService.logout();
+          setAuthKey((k) => k + 1);
+          navigate('/admin');
+        }}
       >
         {adminTab === 'dashboard' && <AdminDashboard onNavigateToTab={setAdminTab} />}
         {adminTab === 'qrcodes' && <AdminQRCodes />}
@@ -60,7 +81,7 @@ export const App: React.FC = () => {
     );
   }
 
-  // 4. PUBLIC DIGITAL VISITING CARD: /tamil-designer-studio (and default /)
+  // 4. PUBLIC DIGITAL VISITING CARD & STUDIO DASHBOARD: /tamil-designer-studio (and default /)
   return <PublicStudioPage />;
 };
 
