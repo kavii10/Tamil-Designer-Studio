@@ -24,6 +24,7 @@ import { db } from '../services/db';
 import { BusinessSettings, CourseItem, ServiceItem } from '../types';
 import { ServiceCard } from '../components/studio/ServiceCard';
 import { CourseCard } from '../components/studio/CourseCard';
+import { AcademySpecialities } from '../components/studio/AcademySpecialities';
 
 /* ═══════════════════════════════════════════════
    SPLASH SCREEN (Clean Large Logo, No Star Above)
@@ -341,6 +342,9 @@ const OverviewSection: React.FC<{
         </div>
       </div>
 
+      {/* ── Academy Specialities Highlight ── */}
+      <AcademySpecialities isDark={isDark} />
+
       {/* ── Course Levels Overview ── */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
@@ -487,73 +491,163 @@ const OverviewSection: React.FC<{
         </div>
       </div>
 
-      {/* ── Batch Timings Card ── */}
-      <div
-        className={`rounded-2xl border p-5 shadow-sm space-y-3 ${
-          isDark ? 'bg-[#171622] border-[#2C293A]' : 'bg-white border-[#E8DAC2]'
-        }`}
-      >
+      {/* ── Batch Timings & Studio Location ── */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Card 1: Batch & Class Timings */}
         <div
-          className={`font-bold text-xs uppercase tracking-wider flex items-center gap-2 ${
-            isDark ? 'text-[#E8BE56]' : 'text-[#8C6010]'
+          className={`rounded-2xl border p-5 shadow-sm space-y-3 flex flex-col justify-between ${
+            isDark ? 'bg-[#171622] border-[#2C293A]' : 'bg-white border-[#E8DAC2]'
           }`}
         >
-          <Clock className="w-4 h-4" />
-          Batch &amp; Class Timings
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div
-            className={`rounded-xl border p-3 text-center ${
-              isDark
-                ? 'bg-gradient-to-br from-[#252233] to-[#1A1824] border-[#3C384D]'
-                : 'bg-gradient-to-br from-[#FAF5EB] to-[#F3E7D3] border-[#E0D0B6]'
-            }`}
-          >
-            <p
-              className={`font-bold text-xs sm:text-sm ${
-                isDark ? 'text-[#FAF6EE]' : 'text-[#2A170E]'
-              }`}
-            >
-              Morning Batch
-            </p>
-            <p
-              className={`font-semibold text-xs mt-0.5 ${
+          <div className="space-y-3">
+            <div
+              className={`font-bold text-xs uppercase tracking-wider flex items-center gap-2 ${
                 isDark ? 'text-[#E8BE56]' : 'text-[#8C6010]'
               }`}
             >
-              9:00 AM – 1:00 PM
-            </p>
+              <Clock className="w-4 h-4" />
+              Batch &amp; Class Timings
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div
+                className={`rounded-xl border p-3 text-center ${
+                  isDark
+                    ? 'bg-gradient-to-br from-[#252233] to-[#1A1824] border-[#3C384D]'
+                    : 'bg-gradient-to-br from-[#FAF5EB] to-[#F3E7D3] border-[#E0D0B6]'
+                }`}
+              >
+                <p
+                  className={`font-bold text-xs sm:text-sm ${
+                    isDark ? 'text-[#FAF6EE]' : 'text-[#2A170E]'
+                  }`}
+                >
+                  Morning Batch
+                </p>
+                <p
+                  className={`font-semibold text-xs mt-0.5 ${
+                    isDark ? 'text-[#E8BE56]' : 'text-[#8C6010]'
+                  }`}
+                >
+                  9:00 AM – 1:00 PM
+                </p>
+              </div>
+              <div
+                className={`rounded-xl border p-3 text-center ${
+                  isDark
+                    ? 'bg-gradient-to-br from-[#252233] to-[#1A1824] border-[#3C384D]'
+                    : 'bg-gradient-to-br from-[#FAF5EB] to-[#F3E7D3] border-[#E0D0B6]'
+                }`}
+              >
+                <p
+                  className={`font-bold text-xs sm:text-sm ${
+                    isDark ? 'text-[#FAF6EE]' : 'text-[#2A170E]'
+                  }`}
+                >
+                  Evening Batch
+                </p>
+                <p
+                  className={`font-semibold text-xs mt-0.5 ${
+                    isDark ? 'text-[#E8BE56]' : 'text-[#8C6010]'
+                  }`}
+                >
+                  3:00 PM – 8:00 PM
+                </p>
+              </div>
+            </div>
           </div>
-          <div
-            className={`rounded-xl border p-3 text-center ${
-              isDark
-                ? 'bg-gradient-to-br from-[#252233] to-[#1A1824] border-[#3C384D]'
-                : 'bg-gradient-to-br from-[#FAF5EB] to-[#F3E7D3] border-[#E0D0B6]'
+          <p
+            className={`text-[11px] text-center pt-1 ${
+              isDark ? 'text-[#8E899E]' : 'text-[#7C6556]'
             }`}
           >
-            <p
-              className={`font-bold text-xs sm:text-sm ${
-                isDark ? 'text-[#FAF6EE]' : 'text-[#2A170E]'
-              }`}
-            >
-              Evening Batch
-            </p>
-            <p
-              className={`font-semibold text-xs mt-0.5 ${
-                isDark ? 'text-[#E8BE56]' : 'text-[#8C6010]'
-              }`}
-            >
-              3:00 PM – 8:00 PM
-            </p>
-          </div>
+            {studio.timings_weekdays || 'Monday to Friday · Regular & Weekend batches available'}
+          </p>
         </div>
-        <p
-          className={`text-[11px] text-center ${
-            isDark ? 'text-[#8E899E]' : 'text-[#7C6556]'
+
+        {/* Card 2: Studio Location & Address */}
+        <div
+          className={`rounded-2xl border p-5 shadow-sm space-y-3 flex flex-col justify-between ${
+            isDark ? 'bg-[#171622] border-[#2C293A]' : 'bg-white border-[#E8DAC2]'
           }`}
         >
-          {studio.timings_weekdays || 'Monday to Friday · Regular & Weekend batches available'}
-        </p>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div
+                className={`font-bold text-xs uppercase tracking-wider flex items-center gap-2 ${
+                  isDark ? 'text-[#E8BE56]' : 'text-[#8C6010]'
+                }`}
+              >
+                <MapPin className="w-4 h-4 text-[#D9A73A]" />
+                Studio Location &amp; Address
+              </div>
+              <span
+                className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${
+                  isDark
+                    ? 'bg-[#E8BE56]/10 border-[#E8BE56]/30 text-[#E8BE56]'
+                    : 'bg-[#FAF0DC] border-[#DFC99C] text-[#7A500C]'
+                }`}
+              >
+                Coimbatore
+              </span>
+            </div>
+
+            <div
+              className={`rounded-xl border p-3.5 space-y-1.5 ${
+                isDark
+                  ? 'bg-gradient-to-br from-[#252233] to-[#1A1824] border-[#3C384D]'
+                  : 'bg-gradient-to-br from-[#FAF5EB] to-[#F3E7D3] border-[#E0D0B6]'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <span
+                  className={`font-serif font-bold text-sm sm:text-base ${
+                    isDark ? 'text-[#FAF6EE]' : 'text-[#2A170E]'
+                  }`}
+                >
+                  {studio.business_name || 'Tamil Designer Studio'}
+                </span>
+                <span
+                  className={`text-[10px] font-semibold px-2 py-0.5 rounded-md ${
+                    isDark ? 'bg-[#D9A73A]/20 text-[#E8BE56]' : 'bg-[#D9A73A]/15 text-[#8C6010]'
+                  }`}
+                >
+                  Visit Studio
+                </span>
+              </div>
+              <p
+                className={`text-xs sm:text-sm font-medium leading-relaxed ${
+                  isDark ? 'text-[#D1CADB]' : 'text-[#4A392D]'
+                }`}
+              >
+                1/208 C, Jeeva street, Chinniyampalayam,<br />
+                Coimbatore - 641062
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 pt-1">
+            <a
+              href={studio.maps_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 inline-flex items-center justify-center gap-2 bg-gradient-to-r from-[#D9A73A] via-[#E8BE56] to-[#C9962A] hover:brightness-105 text-[#160E07] text-xs font-bold py-2.5 px-3 rounded-xl transition-all shadow-sm active:scale-95"
+            >
+              <MapPin className="w-3.5 h-3.5 fill-current" />
+              <span>Get Directions</span>
+            </a>
+            <a
+              href={`tel:+${studio.phone_raw}`}
+              className={`inline-flex items-center justify-center gap-1.5 border text-xs font-bold py-2.5 px-3.5 rounded-xl transition-all active:scale-95 ${
+                isDark
+                  ? 'bg-[#252233] border-[#3C384D] text-[#FAF6EE] hover:border-[#E8BE56]'
+                  : 'bg-white border-[#D9C4A6] text-[#2A170E] hover:border-[#8C6010]'
+              }`}
+            >
+              <Phone className="w-3.5 h-3.5" />
+              <span>Call</span>
+            </a>
+          </div>
+        </div>
       </div>
 
       {/* ── Stitching Services Preview ── */}
@@ -761,7 +855,7 @@ export const PublicStudioPage: React.FC = () => {
         // Exclude Boutique Business Training per user request
         setCourses(
           loadedCourses.filter(
-            (c) => c.id !== 'c5' && !c.title.toLowerCase().includes('boutique business')
+            (c) => !c.title.toLowerCase().includes('boutique business')
           )
         );
       } catch (err) {
@@ -786,7 +880,7 @@ export const PublicStudioPage: React.FC = () => {
       if (customEvent.detail) {
         setCourses(
           customEvent.detail.filter(
-            (c) => c.is_active && c.id !== 'c5' && !c.title.toLowerCase().includes('boutique business')
+            (c) => c.is_active && !c.title.toLowerCase().includes('boutique business')
           )
         );
       }
@@ -1061,33 +1155,67 @@ export const PublicStudioPage: React.FC = () => {
 
         {/* 3. COURSES TAB */}
         {activeTab === 'courses' && (
-          <section className="space-y-4 animate-fadeIn">
+          <section className="space-y-6 animate-fadeIn">
+            {/* Header Banner */}
             <div
-              className={`flex items-center justify-between border-b pb-3 ${
-                isDark ? 'border-[#2A2838]' : 'border-[#E8DAC2]'
+              className={`rounded-3xl p-6 sm:p-8 border shadow-sm text-center space-y-3 relative overflow-hidden ${
+                isDark
+                  ? 'bg-gradient-to-br from-[#1C1A27] via-[#14131D] to-[#0D0C13] border-[#383348]'
+                  : 'bg-gradient-to-br from-[#FFFDF9] via-[#FAF3E8] to-[#F2E5D0] border-[#E8DAC2]'
               }`}
             >
-              <div>
-                <h3
-                  className={`text-xl sm:text-2xl font-serif font-bold ${
-                    isDark ? 'text-[#FAF6EE]' : 'text-[#2A170E]'
-                  }`}
-                >
-                  School of Fashion Design &amp; Tailoring
-                </h3>
-                <p
-                  className={`text-xs mt-0.5 ${
-                    isDark ? 'text-[#8E899E]' : 'text-[#7C6556]'
-                  }`}
-                >
-                  Hands-on professional training with certification &amp; boutique mentorship
-                </p>
+              <div
+                className={`inline-block px-3 py-1 rounded-full border text-[10px] sm:text-xs font-bold uppercase tracking-widest ${
+                  isDark
+                    ? 'bg-gold-500/15 border-gold-400/30 text-gold-300'
+                    : 'bg-[#EEDBBF] border-[#D9B562] text-[#634215]'
+                }`}
+              >
+                Academy Courses &amp; Curriculum
               </div>
-              <GraduationCap
-                className={`w-6 h-6 shrink-0 ${isDark ? 'text-[#E8BE56]' : 'text-[#B8861B]'}`}
-              />
+
+              <h3
+                className={`text-2xl sm:text-3xl font-serif font-bold ${
+                  isDark ? 'text-[#FAF6EE]' : 'text-[#2A170E]'
+                }`}
+              >
+                School of Fashion Design &amp; Tailoring
+              </h3>
+
+              <p
+                className={`text-xs sm:text-sm font-semibold tracking-wider uppercase ${
+                  isDark ? 'text-[#E8BE56]' : 'text-[#9B7120]'
+                }`}
+              >
+                Master Pattern Drafting &bull; Professional Stitching &bull; Certified Training
+              </p>
+
+              {/* 4 Pillars Badges */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 max-w-xl mx-auto">
+                {[
+                  '100% Practical Training',
+                  'Individual Machines',
+                  'Govt. Certification Support',
+                  'Boutique Setup Guidance',
+                ].map((label) => (
+                  <div
+                    key={label}
+                    className={`rounded-xl border py-2 px-2.5 flex items-center justify-center text-[11px] font-bold shadow-2xs ${
+                      isDark
+                        ? 'bg-[#252233]/70 border-[#3C384D] text-[#E8DAC2]'
+                        : 'bg-white/80 border-[#E5D7C3] text-[#5C3F18]'
+                    }`}
+                  >
+                    <span className="truncate">{label}</span>
+                  </div>
+                ))}
+              </div>
             </div>
 
+            {/* Academy Specialities Spotlight */}
+            <AcademySpecialities isDark={isDark} />
+
+            {/* Courses Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {courses.map((course) => (
                 <CourseCard
@@ -1097,6 +1225,41 @@ export const PublicStudioPage: React.FC = () => {
                   isDark={isDark}
                 />
               ))}
+            </div>
+
+            {/* Consultation CTA Banner */}
+            <div
+              className={`rounded-2xl p-5 border text-center space-y-3 shadow-sm ${
+                isDark
+                  ? 'bg-gradient-to-r from-[#201D2D] to-[#171622] border-[#383348]'
+                  : 'bg-gradient-to-r from-[#FAF5EB] to-[#F3E7D3] border-[#E8DAC2]'
+              }`}
+            >
+              <h4
+                className={`font-serif font-bold text-base sm:text-lg ${
+                  isDark ? 'text-[#FAF6EE]' : 'text-[#2A170E]'
+                }`}
+              >
+                Want to Enroll or Inquire About Next Batch Timings?
+              </h4>
+              <p
+                className={`text-xs max-w-md mx-auto ${
+                  isDark ? 'text-[#A7A2B8]' : 'text-[#6B5344]'
+                }`}
+              >
+                Connect directly with our master instructor on WhatsApp to get the complete syllabus booklet, fees details, and seat availability.
+              </p>
+              <div>
+                <a
+                  href={studio.whatsapp_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 bg-gradient-to-r from-[#D9A73A] via-[#E8BE56] to-[#C9962A] text-[#160E07] text-xs font-bold px-6 py-2.5 rounded-xl shadow-md hover:brightness-105 active:scale-95 transition-all"
+                >
+                  <MessageCircle className="w-4 h-4 fill-current" />
+                  <span>Inquire for Admission &amp; Syllabus</span>
+                </a>
+              </div>
             </div>
           </section>
         )}

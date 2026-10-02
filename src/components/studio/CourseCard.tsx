@@ -1,5 +1,5 @@
-import React from 'react';
-import { GraduationCap, Check, ArrowUpRight, Sparkles } from 'lucide-react';
+import React, { useState } from 'react';
+import { GraduationCap, ArrowUpRight, Sparkles, ChevronDown, ChevronUp } from 'lucide-react';
 import { CourseItem } from '../../types';
 
 interface CourseCardProps {
@@ -13,11 +13,14 @@ export const CourseCard: React.FC<CourseCardProps> = ({
   whatsappUrl,
   isDark = false,
 }) => {
-  const isSignature = course.level === 'Specialized' || course.title.toLowerCase().includes('saree');
+  const [showAllTopics, setShowAllTopics] = useState(false);
+  const isSignature = course.level === 'Specialized' || course.title.toLowerCase().includes('blouse') || course.title.toLowerCase().includes('saree');
 
   const inquiryUrl = `${whatsappUrl}&text=${encodeURIComponent(
-    `Hello Tamil Designer Studio, I would like to enroll in or inquire about your ${course.title}.`
+    `Hello Tamil Designer Studio, I would like to enroll in or inquire about your ${course.title} course syllabus.`
   )}`;
+
+  const visibleTopics = showAllTopics ? course.topics : course.topics.slice(0, 6);
 
   return (
     <div
@@ -66,7 +69,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({
                 : 'text-[#7C6556] bg-[#FAF5EB] border-[#E8DAC2]'
             }`}
           >
-            Offline &amp; Practical
+            Practical &amp; Certified
           </span>
         </div>
 
@@ -89,46 +92,85 @@ export const CourseCard: React.FC<CourseCardProps> = ({
           )}
         </div>
 
-        {/* Topics / Curriculum Checklist */}
+        {/* Topics / Syllabus Checklist */}
         <div
-          className={`pt-3 border-t space-y-2 ${
+          className={`pt-3 border-t space-y-2.5 ${
             isDark ? 'border-[#252332]' : 'border-[#F2E7D5]'
           }`}
         >
-          <span
-            className={`text-[11px] font-bold uppercase tracking-wider ${
-              isDark ? 'text-[#8E899E]' : 'text-[#8A7160]'
-            }`}
-          >
-            Curriculum Highlights:
-          </span>
+          <div className="flex items-center justify-between">
+            <span
+              className={`text-[11px] font-bold uppercase tracking-wider ${
+                isDark ? 'text-[#8E899E]' : 'text-[#8A7160]'
+              }`}
+            >
+              Curriculum Topics ({course.topics.length}):
+            </span>
+            {course.topics.length > 6 && (
+              <button
+                type="button"
+                onClick={() => setShowAllTopics(!showAllTopics)}
+                className={`text-[11px] font-bold flex items-center gap-1 ${
+                  isDark ? 'text-[#E8BE56]' : 'text-[#8C6010]'
+                }`}
+              >
+                {showAllTopics ? (
+                  <>Show Less <ChevronUp className="w-3 h-3" /></>
+                ) : (
+                  <>All {course.topics.length} Topics <ChevronDown className="w-3 h-3" /></>
+                )}
+              </button>
+            )}
+          </div>
+
           <ul className="space-y-1.5">
-            {course.topics.map((topic, index) => (
+            {visibleTopics.map((topic, index) => (
               <li
                 key={index}
-                className={`flex items-start gap-2 text-xs ${
+                className={`flex items-start gap-2.5 text-xs ${
                   isDark ? 'text-[#DDD8E8]' : 'text-[#3E291C]'
                 }`}
               >
-                <div
-                  className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 mt-0.5 border ${
+                <span
+                  className={`text-[10px] font-mono font-bold w-5 h-5 rounded-md flex items-center justify-center shrink-0 mt-0.5 border ${
                     isDark
                       ? 'bg-[#2E2818] text-[#E8BE56] border-[#524424]'
                       : 'bg-[#FAF0DC] text-[#8C6010] border-[#DFC99C]'
                   }`}
                 >
-                  <Check className="w-2.5 h-2.5" />
-                </div>
-                <span>{topic}</span>
+                  {index + 1}
+                </span>
+                <span className="leading-snug pt-0.5">{topic}</span>
               </li>
             ))}
           </ul>
+
+          {course.topics.length > 6 && (
+            <button
+              type="button"
+              onClick={() => setShowAllTopics(!showAllTopics)}
+              className={`inline-flex items-center gap-1 text-xs font-semibold pt-1 transition-colors ${
+                isDark ? 'text-[#E8BE56] hover:underline' : 'text-[#9B6E18] hover:underline'
+              }`}
+            >
+              {showAllTopics ? (
+                <>
+                  Show Less <ChevronUp className="w-3.5 h-3.5" />
+                </>
+              ) : (
+                <>
+                  +{course.topics.length - 6} More Topics (View Full Syllabus){' '}
+                  <ChevronDown className="w-3.5 h-3.5" />
+                </>
+              )}
+            </button>
+          )}
         </div>
       </div>
 
       {/* Inquiry Footer */}
       <div
-        className={`mt-6 pt-3 border-t flex items-center justify-between ${
+        className={`mt-6 pt-3.5 border-t flex items-center justify-between ${
           isDark ? 'border-[#252332]' : 'border-[#F2E7D5]'
         }`}
       >

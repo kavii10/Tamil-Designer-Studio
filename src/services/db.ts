@@ -134,59 +134,150 @@ export const DEFAULT_SERVICES: ServiceItem[] = [
     sort_order: 9,
   },
 ];
-const DEFAULT_COURSES: CourseItem[] = [
+export const DEFAULT_COURSES: CourseItem[] = [
   {
     id: 'c1',
-    title: 'Beginner Level',
-    level: 'Beginner',
-    badge: 'Foundations',
-    description: 'Master sewing machines, fundamental stitch mechanics, hand tools, and beginner garment assembly.',
-    topics: ['Machine Basics', 'Basic Stitching', 'Tools Knowledge', 'Simple Garments'],
+    title: 'Blouse Variations',
+    level: 'Advanced',
+    badge: '18 Variations',
+    description: 'Master 18 bespoke designer blouse patterns — from royal princess cuts and Sabyasachi styles to modern halter and tube blouses.',
+    topics: [
+      'Body analysis',
+      'Armhole princess blouse',
+      'Sleeveless princess blouse',
+      'Halter neck blouse',
+      'Tube blouse',
+      'Boat neck blouse',
+      'Shawl collar blouse',
+      'Half Chinese collar blouse',
+      'Princess cut with waist band',
+      'One dart blouse',
+      'Illusion neck blouse',
+      '3 Dart blouse',
+      '4 Dart blouse',
+      'Madhubala blouse',
+      'Katori blouse',
+      'Sabyasachi blouse',
+      'Blouse layout',
+      'Elastic attachment blouse',
+    ],
     is_active: true,
     sort_order: 1,
   },
   {
     id: 'c2',
-    title: 'Intermediate Level',
+    title: 'Kurti Variations',
     level: 'Intermediate',
-    badge: 'Core Skills',
-    description: 'Learn accurate body measurements, precise pattern drafting, women’s wear creation, and fitting techniques.',
-    topics: ['Pattern Drafting', 'Women’s Wear Stitching', 'Fitting Techniques'],
+    badge: '12 Variations',
+    description: 'Learn pattern drafting and stitching for 12 trending kurti styles, collars, asymmetric hemlines, and comfort fits.',
+    topics: [
+      'Straight kurti',
+      'Packed neck kurti',
+      'Side knot kurti',
+      'Deep neck kurti',
+      'Deep neck sleeveless kurti',
+      'A-line kurti',
+      'Flat collar kurti',
+      'Shirt collar kurti',
+      'Princess cut kurti',
+      'High-low kurti',
+      'Angrakha kurti',
+      'Plus size kurti',
+    ],
     is_active: true,
     sort_order: 2,
   },
   {
     id: 'c3',
-    title: 'Advanced Level',
-    level: 'Advanced',
-    badge: 'Couture Mastery',
-    description: 'Design high-end designer garments, bridal masterpieces, and acquire business growth mastery.',
+    title: 'Pant Variations',
+    level: 'Intermediate',
+    badge: '7 Variations',
+    description: 'Master 7 bottom-wear styles including tailored cigarette pants, palazzo flare, and ethnic salwars with comfortable waistband finishes.',
     topics: [
-      'Designer Garments',
-      'Bridal Stitching',
-      'Marketing Strategy',
-      'Social Media Marketing',
+      'Palazzo pants',
+      'Cigarette pants',
+      'High waist pants',
+      'Patiala pants',
+      'Salwar pants',
+      'Jeans',
+      'Leggings',
     ],
     is_active: true,
     sort_order: 3,
   },
   {
     id: 'c4',
-    title: 'Saree Prepleting Class',
+    title: 'Maxi Variations',
+    level: 'Advanced',
+    badge: '11 Variations',
+    description: 'Create floor-length maxi dresses, circular flares, tiered panels, and stunning saree-to-gown upcycling creations.',
+    topics: [
+      'Full circular maxi',
+      'Double circular maxi',
+      'Half circular maxi',
+      'Shoulder princess pleated maxi',
+      'Gathered over coat maxi',
+      'Pleated maxi',
+      '3 Tiered maxi',
+      'Full panel maxi',
+      'Yoke panel maxi',
+      'A-line maxi',
+      'Saree to gown maxi',
+    ],
+    is_active: true,
+    sort_order: 4,
+  },
+  {
+    id: 'c5',
+    title: 'Full Set & Ethnic Ensembles',
+    level: 'Specialized',
+    badge: 'Complete Sets',
+    description: 'Craft matching festive wear ensembles, royal Madhubala co-ords, and trending sharara suits with precision draping.',
+    topics: [
+      'Madhubala set',
+      '2 Piece set',
+      'Sharara',
+    ],
+    is_active: true,
+    sort_order: 5,
+  },
+  {
+    id: 'c6',
+    title: 'Western Outfits',
+    level: 'Couture',
+    badge: '9 Outfits',
+    description: 'Contemporary western fashion techniques — shirts, corsetry, jumpsuits, peplum, kaftan, and structural outerwear.',
+    topics: [
+      'Women’s shirt',
+      'Peplum top',
+      'Kaftan',
+      'Crop top',
+      'One piece',
+      'Corset',
+      'Jumpsuit',
+      'Shirred top',
+      'Over coat',
+    ],
+    is_active: true,
+    sort_order: 6,
+  },
+  {
+    id: 'c7',
+    title: 'Saree Prepleating Class',
     level: 'Specialized',
     badge: 'Signature Masterclass',
-    description: 'Professional saree draping, precision pleating, pinning, ironing, and boutique packaging techniques.',
+    description: 'Professional saree draping, precision pleating, pinning, ironing, box & hanger folding, and boutique packaging techniques.',
     topics: [
       'Saree draping',
-      'Saree prepleting',
-      'Pinig techniques',
-      'Iorning medhod',
+      'Saree prepleating',
+      'Pinning techniques',
+      'Ironing method',
       'Box folding',
       'Hanger folding',
       'Buffy pleats',
     ],
     is_active: true,
-    sort_order: 4,
+    sort_order: 7,
   },
 ];
 
@@ -639,7 +730,7 @@ export const db = {
     return services;
   },
 
-  // ==================== COURSES ====================
+    // ==================== COURSES ====================
   async getCourses(activeOnly = true): Promise<CourseItem[]> {
     if (isSupabaseConfigured && supabase) {
       try {
@@ -647,17 +738,24 @@ export const db = {
         if (activeOnly) q = q.eq('is_active', true);
         const { data, error } = await q;
         if (!error && data && data.length > 0) {
-          if (!activeOnly) {
-            setLocalData(STORAGE_KEYS.COURSES, data);
+          const hasSyllabus = data.some((c: any) => c.title && c.title.toLowerCase().includes('blouse'));
+          if (hasSyllabus) {
+            if (!activeOnly) {
+              setLocalData(STORAGE_KEYS.COURSES, data);
+            }
+            return data as CourseItem[];
           }
-          return data as CourseItem[];
         }
       } catch (err) {
         console.warn('Supabase courses fetch failed:', err);
       }
     }
 
-    const items = getLocalData<CourseItem[]>(STORAGE_KEYS.COURSES, DEFAULT_COURSES);
+    let items = getLocalData<CourseItem[]>(STORAGE_KEYS.COURSES, DEFAULT_COURSES);
+    if (!items || items.length <= 4 || !items.some((c) => c.title && c.title.toLowerCase().includes('blouse'))) {
+      items = DEFAULT_COURSES;
+      setLocalData(STORAGE_KEYS.COURSES, items);
+    }
     return activeOnly ? items.filter((c) => c.is_active) : items;
   },
 

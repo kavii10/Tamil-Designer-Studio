@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS public.business_settings (
 -- 3. COURSES TABLE
 -- Courses and masterclasses offered at the academy
 CREATE TABLE IF NOT EXISTS public.courses (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id VARCHAR(255) PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     level VARCHAR(100) NOT NULL, -- 'Beginner', 'Intermediate', 'Advanced', 'Specialized'
     badge VARCHAR(100),
@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS public.courses (
 -- 4. SERVICES TABLE
 -- Tailoring and bespoke designer services
 CREATE TABLE IF NOT EXISTS public.services (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id VARCHAR(255) PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     description TEXT,
     icon_name VARCHAR(100) DEFAULT 'Sparkles',
@@ -214,11 +214,19 @@ INSERT INTO public.services (title, description, icon_name, image_url, items, so
 ('Prepleating Services', 'Professional saree prepleating, expert draping, precision pinning, ironing, box & hanger folding, and buffy pleats.', 'Scissors', '/services/saree_draping.jpg', '["Saree Draping", "Saree Prepleating", "Pinig Techniques", "Ironing Method", "Box Folding", "Hanger Folding", "Buffy Pleats"]'::jsonb, 9)
 ON CONFLICT DO NOTHING;
 
--- 4. Seed Courses
-INSERT INTO public.courses (title, level, badge, description, topics, sort_order) VALUES
-('Beginner Level', 'Beginner', 'Foundations', 'Master sewing machines, fundamental stitch mechanics, hand tools, and beginner garment assembly.', '["Machine Basics", "Basic Stitching", "Tools Knowledge", "Simple Garments"]'::jsonb, 1),
-('Intermediate Level', 'Intermediate', 'Core Skills', 'Learn accurate body measurements, precise pattern drafting, women’s wear creation, and fitting techniques.', '["Pattern Drafting", "Women’s Wear Stitching", "Fitting Techniques"]'::jsonb, 2),
-('Advanced Level', 'Advanced', 'Couture Mastery', 'Design high-end designer garments, bridal masterpieces, and acquire business growth mastery.', '["Designer Garments", "Bridal Stitching", "Boutique Business Training", "Marketing Strategy", "Social Media Marketing"]'::jsonb, 3),
-('Saree Prepleting Class', 'Specialized', 'Signature Masterclass', 'Professional saree draping, precision pleating, pinning, ironing, and boutique packaging techniques.', '["Saree draping", "Saree prepleting", "Pinig techniques", "Iorning medhod", "Box folding", "Hanger folding", "Buffy pleats"]'::jsonb, 4),
-('Boutique Business Training', 'Entrepreneurship', 'Career Accelerator', 'End-to-end guidance to launch, price, brand, and scale your independent boutique and tailoring studio.', '["Client Consultation & Fitting", "Costing & Profit Margins", "Social Media & Growth Marketing", "Fabric Sourcing & Vendor Networks"]'::jsonb, 5)
-ON CONFLICT DO NOTHING;
+-- 4. Seed Courses (Official Academy Syllabus)
+INSERT INTO public.courses (id, title, level, badge, description, topics, sort_order) VALUES
+('c1', 'Blouse Variations', 'Advanced', '18 Variations', 'Master 18 bespoke designer blouse patterns — from royal princess cuts and Sabyasachi styles to modern halter and tube blouses.', '["Body analysis", "Armhole princess blouse", "Sleeveless princess blouse", "Halter neck blouse", "Tube blouse", "Boat neck blouse", "Shawl collar blouse", "Half Chinese collar blouse", "Princess cut with waist band", "One dart blouse", "Illusion neck blouse", "3 Dart blouse", "4 Dart blouse", "Madhubala blouse", "Katori blouse", "Sabyasachi blouse", "Blouse layout", "Elastic attachment blouse"]'::jsonb, 1),
+('c2', 'Kurti Variations', 'Intermediate', '12 Variations', 'Learn pattern drafting and stitching for 12 trending kurti styles, collars, asymmetric hemlines, and comfort fits.', '["Straight kurti", "Packed neck kurti", "Side knot kurti", "Deep neck kurti", "Deep neck sleeveless kurti", "A-line kurti", "Flat collar kurti", "Shirt collar kurti", "Princess cut kurti", "High-low kurti", "Angrakha kurti", "Plus size kurti"]'::jsonb, 2),
+('c3', 'Pant Variations', 'Intermediate', '7 Variations', 'Master 7 bottom-wear styles including tailored cigarette pants, palazzo flare, and ethnic salwars with comfortable waistband finishes.', '["Palazzo pants", "Cigarette pants", "High waist pants", "Patiala pants", "Salwar pants", "Jeans", "Leggings"]'::jsonb, 3),
+('c4', 'Maxi Variations', 'Advanced', '11 Variations', 'Create floor-length maxi dresses, circular flares, tiered panels, and stunning saree-to-gown upcycling creations.', '["Full circular maxi", "Double circular maxi", "Half circular maxi", "Shoulder princess pleated maxi", "Gathered over coat maxi", "Pleated maxi", "3 Tiered maxi", "Full panel maxi", "Yoke panel maxi", "A-line maxi", "Saree to gown maxi"]'::jsonb, 4),
+('c5', 'Full Set & Ethnic Ensembles', 'Specialized', 'Complete Sets', 'Craft matching festive wear ensembles, royal Madhubala co-ords, and trending sharara suits with precision draping.', '["Madhubala set", "2 Piece set", "Sharara"]'::jsonb, 5),
+('c6', 'Western Outfits', 'Couture', '9 Outfits', 'Contemporary western fashion techniques — shirts, corsetry, jumpsuits, peplum, kaftan, and structural outerwear.', '["Women’s shirt", "Peplum top", "Kaftan", "Crop top", "One piece", "Corset", "Jumpsuit", "Shirred top", "Over coat"]'::jsonb, 6),
+('c7', 'Saree Prepleating Class', 'Specialized', 'Signature Masterclass', 'Professional saree draping, precision pleating, pinning, ironing, box & hanger folding, and boutique packaging techniques.', '["Saree draping", "Saree prepleating", "Pinning techniques", "Ironing method", "Box folding", "Hanger folding", "Buffy pleats"]'::jsonb, 7)
+ON CONFLICT (id) DO UPDATE SET
+  title = EXCLUDED.title,
+  level = EXCLUDED.level,
+  badge = EXCLUDED.badge,
+  description = EXCLUDED.description,
+  topics = EXCLUDED.topics,
+  sort_order = EXCLUDED.sort_order;
