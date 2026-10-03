@@ -153,7 +153,7 @@ export const AdminServices: React.FC = () => {
 
   const handleAddNew = () => {
     const newService: ServiceItem = {
-      id: 'service-' + Date.now(),
+      id: crypto.randomUUID(),
       title: 'New Stitching Category',
       description: 'Custom bespoke stitching tailored to your measurements and preferences.',
       icon_name: 'Scissors',
