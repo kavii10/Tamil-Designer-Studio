@@ -1,8 +1,7 @@
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { AdminUser } from '../types';
 
-const DEFAULT_ADMIN_PASSWORD_1 = 't@mil_designer_studio';
-const DEFAULT_ADMIN_PASSWORD_2 = 't@mil_designer_studioas';
+const DEFAULT_ADMIN_PASSWORD_1 = 'T@mil_designer_studio';
 const AUTH_STORAGE_KEY = 'tds_admin_authenticated';
 const PASSWORD_STORAGE_KEY = 'tds_admin_custom_password';
 
@@ -53,8 +52,7 @@ export const authService = {
 
     if (
       input === activePassword ||
-      input === DEFAULT_ADMIN_PASSWORD_1 ||
-      input === DEFAULT_ADMIN_PASSWORD_2
+      input === DEFAULT_ADMIN_PASSWORD_1
     ) {
       try {
         sessionStorage.setItem(AUTH_STORAGE_KEY, 'true');
