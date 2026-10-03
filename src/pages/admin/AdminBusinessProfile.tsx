@@ -14,6 +14,15 @@ import { InstagramIcon } from '../../components/icons/InstagramIcon';
 import { BusinessSettings } from '../../types';
 import { db } from '../../services/db';
 
+const getErrorMessage = (error: unknown, fallback: string) => {
+  if (error instanceof Error) return error.message;
+  if (typeof error === 'string') return error;
+  if (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string') {
+    return error.message;
+  }
+  return fallback;
+};
+
 export const AdminBusinessProfile: React.FC = () => {
   const [settings, setSettings] = useState<BusinessSettings | null>(null);
   const [loading, setLoading] = useState(true);
@@ -32,7 +41,7 @@ export const AdminBusinessProfile: React.FC = () => {
         setPendingSettings(db.getPendingBusinessSettings());
       } catch (err) {
         console.error(err);
-        setLoadError(err instanceof Error ? err.message : 'Could not load business settings.');
+        setLoadError(getErrorMessage(err, 'Could not load business settings.'));
       } finally {
         setLoading(false);
       }
@@ -62,7 +71,7 @@ export const AdminBusinessProfile: React.FC = () => {
       setTimeout(() => setSavedSuccess(false), 4000);
     } catch (err) {
       console.error(err);
-      setSaveError(err instanceof Error ? err.message : 'Could not save business settings.');
+      setSaveError(getErrorMessage(err, 'Could not save business settings.'));
     } finally {
       setSaving(false);
     }

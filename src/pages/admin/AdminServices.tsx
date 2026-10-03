@@ -33,6 +33,19 @@ const PRESET_IMAGES = [
   { label: 'Saree Prepleating', path: '/services/saree_prepleating.jpg' },
 ];
 
+const getErrorMessage = (error: unknown, fallback: string) => {
+  if (error instanceof Error) return error.message;
+  if (typeof error === 'string') return error;
+  if (error && typeof error === 'object') {
+    const details = error as { message?: unknown; details?: unknown; hint?: unknown; code?: unknown };
+    return [details.message, details.details, details.hint, details.code]
+      .filter((part): part is string => typeof part === 'string' && part.length > 0)
+      .join(' ')
+      || fallback;
+  }
+  return fallback;
+};
+
 export const AdminServices: React.FC = () => {
   const [services, setServices] = useState<ServiceItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -54,7 +67,7 @@ export const AdminServices: React.FC = () => {
         setPendingServices(db.getPendingServices());
       } catch (err) {
         console.error(err);
-        setLoadError(err instanceof Error ? err.message : 'Could not load stitching services.');
+        setLoadError(getErrorMessage(err, 'Could not load stitching services.'));
       } finally {
         setLoading(false);
       }
@@ -93,7 +106,7 @@ export const AdminServices: React.FC = () => {
         return;
       }
     } catch (err) {
-      setImageError(err instanceof Error ? err.message : 'Image upload failed.');
+      setImageError(getErrorMessage(err, 'Image upload failed.'));
     } finally {
       setUploadingServiceId(null);
     }
@@ -169,7 +182,7 @@ export const AdminServices: React.FC = () => {
       setTimeout(() => setSavedSuccess(false), 4000);
     } catch (err) {
       console.error(err);
-      setSaveError(err instanceof Error ? err.message : 'Could not save stitching services.');
+      setSaveError(getErrorMessage(err, 'Could not save stitching services.'));
     } finally {
       setSaving(false);
     }
