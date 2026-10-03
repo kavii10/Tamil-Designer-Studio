@@ -38,6 +38,11 @@ export const AdminServices: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const [saveError, setSaveError] = useState('');
+  const [imageError, setImageError] = useState('');
+  const [loadError, setLoadError] = useState('');
+  const [uploadingServiceId, setUploadingServiceId] = useState<string | null>(null);
+  const [pendingServices, setPendingServices] = useState<ServiceItem[] | null>(null);
   const [newItemInputs, setNewItemInputs] = useState<{ [id: string]: string }>({});
 
   useEffect(() => {
@@ -46,8 +51,10 @@ export const AdminServices: React.FC = () => {
         setLoading(true);
         const data = await db.getServices(false); // all services including inactive
         setServices(data);
+        setPendingServices(db.getPendingServices());
       } catch (err) {
         console.error(err);
+        setLoadError(err instanceof Error ? err.message : 'Could not load stitching services.');
       } finally {
         setLoading(false);
       }
@@ -61,19 +68,35 @@ export const AdminServices: React.FC = () => {
     );
   };
 
-  const handleImageFileUpload = (serviceId: string, e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageFileUpload = async (serviceId: string, e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Read the file as a base64 Data URL for instant preview and offline/online storage
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const dataUrl = event.target?.result as string;
-      if (dataUrl) {
-        handleUpdate(serviceId, { image_url: dataUrl });
+    setImageError('');
+    setUploadingServiceId(serviceId);
+    try {
+      if (db.isCloudEnabled()) {
+        const imageUrl = await db.uploadServiceImage(file);
+        handleUpdate(serviceId, { image_url: imageUrl });
+      } else {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const dataUrl = event.target?.result as string;
+          if (dataUrl) handleUpdate(serviceId, { image_url: dataUrl });
+          setUploadingServiceId(null);
+        };
+        reader.onerror = () => {
+          setImageError('Could not read the selected image.');
+          setUploadingServiceId(null);
+        };
+        reader.readAsDataURL(file);
+        return;
       }
-    };
-    reader.readAsDataURL(file);
+    } catch (err) {
+      setImageError(err instanceof Error ? err.message : 'Image upload failed.');
+    } finally {
+      setUploadingServiceId(null);
+    }
   };
 
   const handleAddItem = (serviceId: string) => {
@@ -136,13 +159,17 @@ export const AdminServices: React.FC = () => {
   };
 
   const handleSaveAll = async () => {
+    if (uploadingServiceId) return;
     try {
       setSaving(true);
+      setSaveError('');
       await db.saveServices(services);
+      setPendingServices(null);
       setSavedSuccess(true);
       setTimeout(() => setSavedSuccess(false), 4000);
     } catch (err) {
       console.error(err);
+      setSaveError(err instanceof Error ? err.message : 'Could not save stitching services.');
     } finally {
       setSaving(false);
     }
@@ -150,6 +177,10 @@ export const AdminServices: React.FC = () => {
 
   if (loading) {
     return <div className="text-center py-12 text-studio-500 text-xs">Loading stitching services...</div>;
+  }
+
+  if (loadError) {
+    return <div role="alert" className="p-4 text-sm text-rose-800 bg-rose-50 border border-rose-200 rounded-xl">Could not load stitching services: {loadError}</div>;
   }
 
   return (
@@ -184,9 +215,19 @@ export const AdminServices: React.FC = () => {
             <span>Add Category</span>
           </button>
 
+          {pendingServices && (
+            <button
+              type="button"
+              onClick={() => setServices(pendingServices)}
+              className="inline-flex items-center gap-1.5 text-xs bg-amber-50 hover:bg-amber-100 text-amber-950 border border-amber-300 px-3 py-2 rounded-xl font-semibold"
+            >
+              Restore recovered edits
+            </button>
+          )}
+
           <button
             onClick={handleSaveAll}
-            disabled={saving}
+            disabled={saving || uploadingServiceId !== null}
             className="inline-flex items-center gap-1.5 text-xs bg-studio-800 hover:bg-studio-900 text-white px-4 py-2 rounded-xl transition-all shadow-subtle font-semibold"
           >
             {saving ? (
@@ -204,7 +245,15 @@ export const AdminServices: React.FC = () => {
       {savedSuccess && (
         <div className="p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs rounded-xl flex items-center gap-2 animate-fadeIn">
           <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-          <span>Stitching services successfully saved! Updated live on your website.</span>
+          <span>{db.isCloudEnabled()
+            ? 'Stitching services saved to the shared database.'
+            : 'Stitching services saved on this device only. Connect Supabase to sync across devices.'}</span>
+        </div>
+      )}
+      {(saveError || imageError) && (
+        <div role="alert" className="p-3.5 bg-rose-50 border border-rose-200 text-rose-900 text-xs rounded-xl space-y-1">
+          {saveError && <p>Services were not saved: {saveError}</p>}
+          {imageError && <p>Image upload failed: {imageError}</p>}
         </div>
       )}
 
@@ -269,10 +318,11 @@ export const AdminServices: React.FC = () => {
                     <span>Upload Image</span>
                     <input
                       type="file"
-                      accept="image/*"
+                      accept="image/jpeg,image/png,image/webp,image/gif"
                       className="hidden"
                       onChange={(e) => handleImageFileUpload(service.id, e)}
                     />
+                    {uploadingServiceId === service.id && <span className="text-[10px] text-studio-500">Uploading...</span>}
                   </label>
                 </div>
 

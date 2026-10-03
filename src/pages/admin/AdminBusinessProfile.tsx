@@ -19,6 +19,9 @@ export const AdminBusinessProfile: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const [saveError, setSaveError] = useState('');
+  const [loadError, setLoadError] = useState('');
+  const [pendingSettings, setPendingSettings] = useState<BusinessSettings | null>(null);
 
   useEffect(() => {
     async function fetchSettings() {
@@ -26,8 +29,10 @@ export const AdminBusinessProfile: React.FC = () => {
         setLoading(true);
         const data = await db.getBusinessSettings();
         setSettings(data);
+        setPendingSettings(db.getPendingBusinessSettings());
       } catch (err) {
         console.error(err);
+        setLoadError(err instanceof Error ? err.message : 'Could not load business settings.');
       } finally {
         setLoading(false);
       }
@@ -49,19 +54,26 @@ export const AdminBusinessProfile: React.FC = () => {
 
     try {
       setSaving(true);
+      setSaveError('');
       const updated = await db.updateBusinessSettings(settings);
       setSettings(updated);
+      setPendingSettings(null);
       setSavedSuccess(true);
       setTimeout(() => setSavedSuccess(false), 4000);
     } catch (err) {
       console.error(err);
+      setSaveError(err instanceof Error ? err.message : 'Could not save business settings.');
     } finally {
       setSaving(false);
     }
   };
 
-  if (loading || !settings) {
+  if (loading) {
     return <div className="text-center py-12 text-studio-500 text-xs">Loading profile settings...</div>;
+  }
+
+  if (!settings) {
+    return <div role="alert" className="p-4 text-sm text-rose-800 bg-rose-50 border border-rose-200 rounded-xl">{loadError || 'Business settings are unavailable.'}</div>;
   }
 
   return (
@@ -92,8 +104,27 @@ export const AdminBusinessProfile: React.FC = () => {
         <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs sm:text-sm rounded-2xl flex items-center gap-2.5 animate-fadeIn">
           <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
           <span className="font-semibold">
-            Business profile successfully updated! Changes are live on your digital card.
+            {db.isCloudEnabled()
+              ? 'Business profile saved to the shared database.'
+              : 'Business profile saved on this device only. Connect Supabase to sync across devices.'}
           </span>
+        </div>
+      )}
+      {saveError && (
+        <div role="alert" className="p-4 bg-rose-50 border border-rose-200 text-rose-900 text-xs sm:text-sm rounded-xl">
+          Business profile was not saved: {saveError}
+        </div>
+      )}
+      {pendingSettings && (
+        <div className="p-4 bg-amber-50 border border-amber-200 text-amber-950 text-xs sm:text-sm rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <span>Unsynced profile edits from this device were recovered.</span>
+          <button
+            type="button"
+            onClick={() => setSettings(pendingSettings)}
+            className="shrink-0 font-semibold underline underline-offset-2"
+          >
+            Restore recovered edits
+          </button>
         </div>
       )}
 

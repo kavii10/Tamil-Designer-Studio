@@ -105,6 +105,7 @@ The application features a **Dual Data Layer**:
    ```bash
    supabase/schema.sql
    ```
+   For an existing project, also run `supabase/storage_images.sql` once to configure public service-image storage.
 3. Copy your project URL and Anon Key into `.env`:
    ```env
    VITE_SUPABASE_URL=https://your-project.supabase.co

@@ -284,8 +284,10 @@ export const DEFAULT_COURSES: CourseItem[] = [
 // Helper to load/save localStorage
 const STORAGE_KEYS = {
   SETTINGS: 'tds_business_settings',
+  PENDING_SETTINGS: 'tds_pending_business_settings',
   QR_CODES: 'tds_qr_codes',
   SERVICES: 'tds_services',
+  PENDING_SERVICES: 'tds_pending_services',
   COURSES: 'tds_courses',
   SCAN_LOGS: 'tds_scan_logs',
 };
@@ -308,6 +310,15 @@ function setLocalData<T>(key: string, data: T): void {
     localStorage.setItem(key, JSON.stringify(data));
   } catch (err) {
     console.error('Failed to write to localStorage', err);
+  }
+}
+
+function getPendingData<T>(key: string): T | null {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) as T : null;
+  } catch {
+    return null;
   }
 }
 
@@ -610,20 +621,28 @@ export const db = {
   // ==================== BUSINESS SETTINGS ====================
   async getBusinessSettings(): Promise<BusinessSettings> {
     if (isSupabaseConfigured && supabase) {
-      try {
-        const { data, error } = await supabase
-          .from('business_settings')
-          .select('*')
-          .limit(1)
-          .single();
-        if (!error && data) {
-          // Sync to localStorage
-          setLocalData(STORAGE_KEYS.SETTINGS, data);
-          return data as BusinessSettings;
+      const { data, error } = await supabase
+        .from('business_settings')
+        .select('*')
+        .limit(1)
+        .single();
+      if (error) throw error;
+      if (!data) throw new Error('Business settings were not found in Supabase.');
+
+      const cached = getPendingData<BusinessSettings>(STORAGE_KEYS.SETTINGS);
+      if (cached) {
+        const { id: _cachedId, updated_at: _cachedUpdatedAt, ...cachedValues } = cached;
+        const { id: _defaultId, updated_at: _defaultUpdatedAt, ...defaultValues } = DEFAULT_BUSINESS_SETTINGS;
+        const { id: _cloudId, updated_at: _cloudUpdatedAt, ...cloudValues } = data as BusinessSettings;
+        if (
+          JSON.stringify(cachedValues) !== JSON.stringify(defaultValues) &&
+          JSON.stringify(cachedValues) !== JSON.stringify(cloudValues)
+        ) {
+          setLocalData(STORAGE_KEYS.PENDING_SETTINGS, cached);
         }
-      } catch (err) {
-        console.warn('Supabase fetch failed:', err);
       }
+      setLocalData(STORAGE_KEYS.SETTINGS, data);
+      return data as BusinessSettings;
     }
 
     const settings = getLocalData<BusinessSettings>(STORAGE_KEYS.SETTINGS, DEFAULT_BUSINESS_SETTINGS);
@@ -635,39 +654,34 @@ export const db = {
     let result: BusinessSettings | null = null;
 
     if (isSupabaseConfigured && supabase) {
-      try {
-        // Try update first
-        const { data: updateData, error: updateError } = await supabase
+      const { data: updateData, error: updateError } = await supabase
+        .from('business_settings')
+        .update({ ...updates, updated_at })
+        .eq('id', DEFAULT_BUSINESS_SETTINGS.id)
+        .select()
+        .maybeSingle();
+
+      if (updateError) throw updateError;
+      if (updateData) {
+        result = updateData as BusinessSettings;
+      } else {
+        const { data: upsertData, error: upsertError } = await supabase
           .from('business_settings')
-          .update({ ...updates, updated_at })
-          .eq('id', DEFAULT_BUSINESS_SETTINGS.id)
+          .upsert({ ...DEFAULT_BUSINESS_SETTINGS, ...updates, updated_at })
           .select()
           .single();
-
-        if (!updateError && updateData) {
-          result = updateData as BusinessSettings;
-        } else {
-          // If no row exists yet with that ID, upsert it
-          const { data: upsertData, error: upsertError } = await supabase
-            .from('business_settings')
-            .upsert({ ...DEFAULT_BUSINESS_SETTINGS, ...updates, updated_at })
-            .select()
-            .single();
-
-          if (!upsertError && upsertData) {
-            result = upsertData as BusinessSettings;
-          } else if (upsertError) {
-            console.warn('Supabase upsert error:', upsertError);
-          }
-        }
-      } catch (err) {
-        console.warn('Supabase settings update failed:', err);
+        if (upsertError) throw upsertError;
+        if (!upsertData) throw new Error('Supabase did not return the saved business settings.');
+        result = upsertData as BusinessSettings;
       }
     }
 
     const current = getLocalData<BusinessSettings>(STORAGE_KEYS.SETTINGS, DEFAULT_BUSINESS_SETTINGS);
     const updated = { ...current, ...(result || updates), updated_at };
     setLocalData(STORAGE_KEYS.SETTINGS, updated);
+    if (result && typeof localStorage !== 'undefined') {
+      localStorage.removeItem(STORAGE_KEYS.PENDING_SETTINGS);
+    }
 
     // Dispatch event to inform live UI components
     if (typeof window !== 'undefined') {
@@ -680,22 +694,23 @@ export const db = {
   // ==================== SERVICES ====================
   async getServices(activeOnly = true): Promise<ServiceItem[]> {
     if (isSupabaseConfigured && supabase) {
-      try {
-        let q = supabase.from('services').select('*').order('sort_order', { ascending: true });
-        if (activeOnly) q = q.eq('is_active', true);
-        const { data, error } = await q;
-        if (!error && data && data.length > 0) {
-          const isOldEmptySeed = data.length <= 5 && !data.some((s: any) => s.image_url);
-          if (!isOldEmptySeed) {
-            if (!activeOnly) {
-              setLocalData(STORAGE_KEYS.SERVICES, data);
-            }
-            return data as ServiceItem[];
-          }
+      let q = supabase.from('services').select('*').order('sort_order', { ascending: true });
+      if (activeOnly) q = q.eq('is_active', true);
+      const { data, error } = await q;
+      if (error) throw error;
+      const services = (data || []) as ServiceItem[];
+      if (!activeOnly) {
+        const cached = getPendingData<ServiceItem[]>(STORAGE_KEYS.SERVICES);
+        if (
+          cached &&
+          JSON.stringify(cached) !== JSON.stringify(DEFAULT_SERVICES) &&
+          JSON.stringify(cached) !== JSON.stringify(services)
+        ) {
+          setLocalData(STORAGE_KEYS.PENDING_SERVICES, cached);
         }
-      } catch (err) {
-        console.warn('Supabase services fetch failed:', err);
+        setLocalData(STORAGE_KEYS.SERVICES, services);
       }
+      return services;
     }
 
     let items = getLocalData<ServiceItem[]>(STORAGE_KEYS.SERVICES, DEFAULT_SERVICES);
@@ -707,27 +722,50 @@ export const db = {
   },
 
   async saveServices(services: ServiceItem[]): Promise<ServiceItem[]> {
-    setLocalData(STORAGE_KEYS.SERVICES, services);
-
     if (isSupabaseConfigured && supabase) {
-      try {
-        // Upsert services by ID to preserve database integrity
-        const { error } = await supabase
-          .from('services')
-          .upsert(services, { onConflict: 'id' });
-        if (error) {
-          console.warn('Supabase saveServices error:', error);
-        }
-      } catch (err) {
-        console.warn('Supabase saveServices failed:', err);
+      const { error } = await supabase
+        .from('services')
+        .upsert(services, { onConflict: 'id' });
+      if (error) throw error;
+      if (typeof localStorage !== 'undefined') {
+        localStorage.removeItem(STORAGE_KEYS.PENDING_SERVICES);
       }
     }
+
+    setLocalData(STORAGE_KEYS.SERVICES, services);
 
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('tds_services_updated', { detail: services }));
     }
 
     return services;
+  },
+
+  async uploadServiceImage(file: File): Promise<string> {
+    if (!isSupabaseConfigured || !supabase) {
+      throw new Error('Connect Supabase to upload an image that is available on all devices.');
+    }
+    if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(file.type)) {
+      throw new Error('Choose a JPEG, PNG, WebP, or GIF image.');
+    }
+    if (file.size > 10 * 1024 * 1024) throw new Error('Image must be 10 MB or smaller.');
+
+    const extension = file.name.split('.').pop()?.toLowerCase() || 'img';
+    const path = `${crypto.randomUUID()}.${extension}`;
+    const { error } = await supabase.storage
+      .from('studio-images')
+      .upload(path, file, { cacheControl: '31536000', contentType: file.type });
+    if (error) throw error;
+
+    return supabase.storage.from('studio-images').getPublicUrl(path).data.publicUrl;
+  },
+
+  getPendingBusinessSettings(): BusinessSettings | null {
+    return getPendingData<BusinessSettings>(STORAGE_KEYS.PENDING_SETTINGS);
+  },
+
+  getPendingServices(): ServiceItem[] | null {
+    return getPendingData<ServiceItem[]>(STORAGE_KEYS.PENDING_SERVICES);
   },
 
     // ==================== COURSES ====================
