@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CheckCircle2, ChevronDown, ChevronUp, Image as ImageIcon, ZoomIn, X } from 'lucide-react';
+import { CheckCircle2, ChevronDown, ChevronUp, Image as ImageIcon } from 'lucide-react';
 import { ServiceItem } from '../../types';
 
 interface ServiceCardProps {
@@ -10,14 +10,12 @@ interface ServiceCardProps {
 export const ServiceCard: React.FC<ServiceCardProps> = ({ service, isDark = false }) => {
   const [imgError, setImgError] = useState(false);
   const [showAllItems, setShowAllItems] = useState(false);
-  const [lightboxOpen, setLightboxOpen] = useState(false);
 
   const hasImage = service.image_url && !imgError;
   const items = service.items || [];
   const visibleItems = showAllItems ? items : items.slice(0, 4);
 
   return (
-    <>
       <div
         className={`group rounded-2xl overflow-hidden border shadow-sm transition-all duration-300 flex flex-col h-full ${
           isDark
@@ -26,28 +24,14 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({ service, isDark = fals
         }`}
       >
         {/* ── Service Image Frame (Taller & Clearer) ── */}
-        <div
-          onClick={() => hasImage && setLightboxOpen(true)}
-          className={`relative w-full h-64 sm:h-72 md:h-80 overflow-hidden ${
-            hasImage ? 'cursor-pointer' : ''
-          } ${isDark ? 'bg-[#1A1824]' : 'bg-[#F3EAD8]'}`}
-        >
+        <div className={`relative w-full h-64 sm:h-72 md:h-80 overflow-hidden ${isDark ? 'bg-[#1A1824]' : 'bg-[#F3EAD8]'}`}>
           {hasImage ? (
-            <>
-              <img
-                src={service.image_url}
-                alt={service.title}
-                className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
-                onError={() => setImgError(true)}
-              />
-              {/* Subtle Zoom Hint on Hover */}
-              <div className="absolute inset-0 bg-black/25 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
-                <span className="bg-black/70 text-white text-xs px-3 py-1.5 rounded-full flex items-center gap-1.5 font-medium shadow-md backdrop-blur-xs">
-                  <ZoomIn className="w-3.5 h-3.5" />
-                  View Full Image
-                </span>
-              </div>
-            </>
+            <img
+              src={service.image_url}
+              alt={service.title}
+              className="w-full h-full object-cover object-top"
+              onError={() => setImgError(true)}
+            />
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center gap-2 p-4 text-center">
               <ImageIcon className={`w-8 h-8 ${isDark ? 'text-[#48445C]' : 'text-[#D9C8AD]'}`} />
@@ -147,46 +131,5 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({ service, isDark = fals
         </div>
       </div>
 
-      {/* ── Image Lightbox Modal ── */}
-      {lightboxOpen && hasImage && (
-        <div
-          className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-fadeIn"
-          onClick={() => setLightboxOpen(false)}
-        >
-          <div
-            className="relative max-w-3xl w-full max-h-[90vh] bg-studio-900 rounded-3xl overflow-hidden border border-[#D9A73A]/40 shadow-2xl flex flex-col"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between px-5 py-3.5 bg-black/60 border-b border-[#383348]">
-              <h3 className="font-serif font-bold text-white text-base truncate">
-                {service.title}
-              </h3>
-              <button
-                type="button"
-                onClick={() => setLightboxOpen(false)}
-                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
-                title="Close"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="flex-1 overflow-auto p-4 flex items-center justify-center bg-black/40">
-              <img
-                src={service.image_url}
-                alt={service.title}
-                className="max-w-full max-h-[72vh] object-contain rounded-xl shadow-lg"
-              />
-            </div>
-
-            {service.description && (
-              <div className="px-5 py-3 bg-black/60 border-t border-[#383348] text-center">
-                <p className="text-xs text-gold-200">{service.description}</p>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-    </>
   );
 };
