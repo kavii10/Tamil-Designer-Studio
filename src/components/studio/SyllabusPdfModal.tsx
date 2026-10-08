@@ -17,6 +17,10 @@ import { CourseStageSyllabus } from '../../types';
 import { generateStageSyllabusPdf, downloadPdf } from '../../utils/pdfGenerator';
 import { Lang } from '../../i18n/translations';
 
+const MobilePdfViewer = React.lazy(() =>
+  import('./MobilePdfViewer').then((module) => ({ default: module.MobilePdfViewer }))
+);
+
 interface SyllabusPdfModalProps {
   stage: CourseStageSyllabus | null;
   whatsappUrl: string;
@@ -212,42 +216,16 @@ export const SyllabusPdfModal: React.FC<SyllabusPdfModalProps> = ({
       {/* ── Main Fullscreen PDF Canvas (100% Height & Width) ── */}
       <main className="flex-1 w-full h-[calc(100dvh-4rem)] relative bg-[#1B1924] flex flex-col overflow-hidden">
         {activePdfUrl ? (
-          isMobileBrowser() && (activePdfUrl.startsWith('blob:') || activePdfUrl.startsWith('data:')) ? (
-            <div className="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-5 text-white max-w-md mx-auto">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-[#D9A73A] to-[#E8BE56] text-[#160E07] flex items-center justify-center shadow-lg">
-                <FileText className="w-8 h-8" />
-              </div>
-              <div className="space-y-2">
-                <h3 className="font-serif font-bold text-lg sm:text-xl text-white">
-                  {displayTitle}
-                </h3>
-                <p className="text-xs text-[#A7A2B8] leading-relaxed">
-                  {isTa
-                    ? 'மொபைல் உலாவிகளில் PDF-ஐ நேரடியாகப் பார்க்க பதிவிறக்கம் செய்யவும் அல்லது திறக்கவும்.'
-                    : 'Mobile browsers do not preview embedded PDFs inside the browser. Tap below to download or view directly.'}
-                </p>
-              </div>
-
-              <div className="flex flex-col w-full gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={handleDownload}
-                  className="w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl bg-gradient-to-r from-[#D9A73A] via-[#E8BE56] to-[#C9962A] text-[#160E07] text-sm font-bold shadow-md active:scale-95 transition-transform"
-                >
-                  <Download className="w-4 h-4" />
-                  <span>{isTa ? 'PDF பதிவிறக்கம் செய்க (Download)' : 'Download Syllabus PDF'}</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleOpenInNewTab}
-                  className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-[#3C384D] bg-[#221F2F] text-xs font-semibold text-[#DDD8E8] active:scale-95 transition-transform"
-                >
-                  <ExternalLink className="w-4 h-4 text-gold-400" />
-                  <span>{isTa ? 'புதிய தாவலில் திறக்க (Open in Tab)' : 'Open in New Tab'}</span>
-                </button>
-              </div>
-            </div>
+          isMobileBrowser() ? (
+            <React.Suspense
+              fallback={
+                <div className="flex-1 pt-10 text-center text-sm text-white">
+                  {isTa ? 'PDF பார்வையாளர் ஏற்றப்படுகிறது…' : 'Loading PDF viewer…'}
+                </div>
+              }
+            >
+              <MobilePdfViewer url={activePdfUrl} title={displayTitle} lang={lang} />
+            </React.Suspense>
           ) : (
             <iframe
               src={

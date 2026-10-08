@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   GraduationCap,
   Plus,
@@ -40,6 +40,46 @@ function getErrorMessage(error: unknown, fallback: string): string {
   return fallback;
 }
 
+const COURSE_DRAFT_STORAGE_KEY = 'tds_admin_courses_draft';
+
+interface CourseDraft {
+  courses?: CourseItem[];
+  stageSyllabuses?: CourseStageSyllabus[];
+}
+
+function readCourseDraft(): CourseDraft | null {
+  try {
+    const draft = localStorage.getItem(COURSE_DRAFT_STORAGE_KEY);
+    return draft ? JSON.parse(draft) as CourseDraft : null;
+  } catch (error) {
+    console.warn('Failed to read unsaved course draft:', error);
+    return null;
+  }
+}
+
+function clearCourseDraftSection(section?: keyof CourseDraft): boolean {
+  try {
+    if (!section) {
+      localStorage.removeItem(COURSE_DRAFT_STORAGE_KEY);
+      return true;
+    }
+
+    const draft = readCourseDraft();
+    if (draft) {
+      delete draft[section];
+      if (Object.keys(draft).length === 0) {
+        localStorage.removeItem(COURSE_DRAFT_STORAGE_KEY);
+      } else {
+        localStorage.setItem(COURSE_DRAFT_STORAGE_KEY, JSON.stringify(draft));
+      }
+    }
+    return true;
+  } catch (error) {
+    console.warn('Failed to update unsaved course draft:', error);
+    return false;
+  }
+}
+
 interface AdminCoursesProps {
   editLang?: Lang;
   onLangChange?: (lang: Lang) => void;
@@ -59,19 +99,43 @@ export const AdminCourses: React.FC<AdminCoursesProps> = ({
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [previewStage, setPreviewStage] = useState<CourseStageSyllabus | null>(null);
+  const [coursesDirty, setCoursesDirty] = useState(false);
+  const [stagesDirty, setStagesDirty] = useState(false);
+  const coursesDirtyRef = useRef(false);
+  const stagesDirtyRef = useRef(false);
 
   const isTa = editLang === 'ta';
 
   useEffect(() => {
     async function fetchData() {
       try {
-        setLoading(true);
         const [loadedCourses, loadedStages] = await Promise.all([
           db.getCourses(false), // fetch all courses including inactive
           db.getStageSyllabuses(),
         ]);
-        setCourses(loadedCourses);
-        setStageSyllabuses(loadedStages);
+        const draft = readCourseDraft();
+        if (!coursesDirtyRef.current) {
+          setCourses(draft?.courses || loadedCourses);
+          if (draft?.courses) {
+            coursesDirtyRef.current = true;
+            setCoursesDirty(true);
+          }
+        }
+        if (!stagesDirtyRef.current) {
+          const restoredStages = draft?.stageSyllabuses
+            ? loadedStages.map((stage) => {
+                const draftStage = draft.stageSyllabuses?.find((item) => item.id === stage.id);
+                return draftStage
+                  ? { ...stage, ...draftStage, pdf_url: draftStage.pdf_url || stage.pdf_url }
+                  : stage;
+              })
+            : loadedStages;
+          setStageSyllabuses(restoredStages);
+          if (draft?.stageSyllabuses) {
+            stagesDirtyRef.current = true;
+            setStagesDirty(true);
+          }
+        }
       } catch (err) {
         console.error(err);
       } finally {
@@ -92,6 +156,7 @@ export const AdminCourses: React.FC<AdminCoursesProps> = ({
           'postgres_changes',
           { event: '*', schema: 'public', table: 'courses' },
           async () => {
+            if (coursesDirtyRef.current) return;
             try {
               const freshCourses = await db.getCourses(false);
               setCourses(freshCourses);
@@ -104,6 +169,7 @@ export const AdminCourses: React.FC<AdminCoursesProps> = ({
           'postgres_changes',
           { event: '*', schema: 'public', table: 'course_stage_syllabuses' },
           async () => {
+            if (stagesDirtyRef.current) return;
             try {
               const freshStages = await db.getStageSyllabuses();
               setStageSyllabuses(freshStages);
@@ -123,8 +189,52 @@ export const AdminCourses: React.FC<AdminCoursesProps> = ({
     };
   }, []);
 
+  useEffect(() => {
+    if (loading || (!coursesDirty && !stagesDirty)) return;
+
+    const draft = readCourseDraft() || {};
+    if (coursesDirty) draft.courses = courses;
+    if (stagesDirty) {
+      draft.stageSyllabuses = stageSyllabuses.map((stage) => ({
+        ...stage,
+        pdf_url: stage.pdf_url?.startsWith('http') ? stage.pdf_url : '',
+      }));
+    }
+    try {
+      localStorage.setItem(COURSE_DRAFT_STORAGE_KEY, JSON.stringify(draft));
+    } catch (error) {
+      console.error('Failed to preserve unsaved course changes:', error);
+      setSaveError('Could not preserve unsaved changes on this device. Please save before leaving this page.');
+    }
+  }, [courses, stageSyllabuses, coursesDirty, stagesDirty, loading]);
+
+  const markCoursesDirty = () => {
+    coursesDirtyRef.current = true;
+    setCoursesDirty(true);
+  };
+
+  const markStagesDirty = () => {
+    stagesDirtyRef.current = true;
+    setStagesDirty(true);
+  };
+
+  const clearCourseDraft = (section?: keyof CourseDraft) => {
+    if (!clearCourseDraftSection(section)) {
+      setSaveError('Changes were saved, but the local draft could not be cleared.');
+    }
+    if (!section || section === 'courses') {
+      coursesDirtyRef.current = false;
+      setCoursesDirty(false);
+    }
+    if (!section || section === 'stageSyllabuses') {
+      stagesDirtyRef.current = false;
+      setStagesDirty(false);
+    }
+  };
+
   // ── Stage Syllabus Handlers ──
   const handleUpdateStage = (id: string, updates: Partial<CourseStageSyllabus>) => {
+    markStagesDirty();
     setStageSyllabuses((prev) =>
       prev.map((s) => (s.id === id ? { ...s, ...updates } : s))
     );
@@ -155,6 +265,7 @@ export const AdminCourses: React.FC<AdminCoursesProps> = ({
       );
       await db.saveStageSyllabuses(updated);
       setStageSyllabuses(updated);
+      clearCourseDraft('stageSyllabuses');
       setStageSaveSuccess(true);
       setTimeout(() => setStageSaveSuccess(false), 4000);
     } catch (err) {
@@ -183,6 +294,7 @@ export const AdminCourses: React.FC<AdminCoursesProps> = ({
         );
         await db.saveStageSyllabuses(updated);
         setStageSyllabuses(updated);
+        clearCourseDraft('stageSyllabuses');
       } catch (err) {
         setSaveError(getErrorMessage(err, 'Failed to remove the syllabus PDF.'));
       }
@@ -194,6 +306,7 @@ export const AdminCourses: React.FC<AdminCoursesProps> = ({
       setSaving(true);
       setSaveError(null);
       await db.saveStageSyllabuses(stageSyllabuses);
+      clearCourseDraft('stageSyllabuses');
       setStageSaveSuccess(true);
       setTimeout(() => setStageSaveSuccess(false), 4000);
     } catch (err) {
@@ -215,6 +328,7 @@ export const AdminCourses: React.FC<AdminCoursesProps> = ({
 
   // ── Individual Course Handlers ──
   const handleUpdateCourse = (id: string, updates: Partial<CourseItem>) => {
+    markCoursesDirty();
     setCourses((prev) =>
       prev.map((c) => (c.id === id ? { ...c, ...updates } : c))
     );
@@ -231,6 +345,7 @@ export const AdminCourses: React.FC<AdminCoursesProps> = ({
 
     if (newItems.length === 0) return;
 
+    markCoursesDirty();
     setCourses((prev) =>
       prev.map((c) => {
         if (c.id === courseId) {
@@ -246,6 +361,7 @@ export const AdminCourses: React.FC<AdminCoursesProps> = ({
   };
 
   const handleRemoveTopic = (courseId: string, topicIndex: number) => {
+    markCoursesDirty();
     setCourses((prev) =>
       prev.map((c) => {
         if (c.id === courseId) {
@@ -269,12 +385,15 @@ export const AdminCourses: React.FC<AdminCoursesProps> = ({
         'Load all 7 official academy courses (Blouse, Kurti, Pant, Maxi, Full Set, Western, Prepleating) with their complete syllabus? You can still edit or add more before saving.'
       )
     ) {
+      markCoursesDirty();
+      markStagesDirty();
       setCourses(JSON.parse(JSON.stringify(DEFAULT_COURSES)));
       setStageSyllabuses(JSON.parse(JSON.stringify(DEFAULT_STAGE_SYLLABUSES)));
     }
   };
 
   const handleAddNewCourse = () => {
+    markCoursesDirty();
     const newCourse: CourseItem = {
       id: 'course-' + Date.now(),
       title: 'New Masterclass Course',
@@ -290,6 +409,7 @@ export const AdminCourses: React.FC<AdminCoursesProps> = ({
 
   const handleDeleteCourse = (id: string) => {
     if (window.confirm('Are you sure you want to remove this course and its syllabus?')) {
+      markCoursesDirty();
       setCourses(courses.filter((c) => c.id !== id));
     }
   };
@@ -302,6 +422,7 @@ export const AdminCourses: React.FC<AdminCoursesProps> = ({
         db.saveCourses(courses),
         db.saveStageSyllabuses(stageSyllabuses),
       ]);
+      clearCourseDraft();
       setSavedSuccess(true);
       setTimeout(() => setSavedSuccess(false), 4000);
     } catch (err) {
@@ -374,6 +495,17 @@ export const AdminCourses: React.FC<AdminCoursesProps> = ({
         <div className="p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs rounded-xl flex items-center gap-2 animate-fadeIn">
           <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
           <span>All courses, syllabus PDFs, and topics successfully saved! Live on your website.</span>
+        </div>
+      )}
+
+      {(coursesDirty || stagesDirty) && (
+        <div className="p-3.5 bg-amber-50 border border-amber-200 text-amber-950 text-xs rounded-xl flex items-center gap-2 animate-fadeIn">
+          <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+          <span>
+            {isTa
+              ? 'சேமிக்காத மாற்றங்கள் இந்த சாதனத்தில் வரைவு நிலையில் பாதுகாக்கப்படும். மற்ற சாதனங்களில் காட்ட சேமிக்கவும்.'
+              : 'Unsaved changes are kept as a draft on this device. Save to publish them to other devices.'}
+          </span>
         </div>
       )}
 
