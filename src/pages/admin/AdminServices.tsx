@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { ServiceItem } from '../../types';
 import { db, DEFAULT_SERVICES } from '../../services/db';
+import { supabase, isSupabaseConfigured } from '../../lib/supabase';
 import { Lang } from '../../i18n/translations';
 
 const PRESET_IMAGES = [
@@ -84,6 +85,36 @@ export const AdminServices: React.FC<AdminServicesProps> = ({
       }
     }
     fetchServices();
+
+    // Cross-device sync: listen for window focus
+    window.addEventListener('focus', fetchServices);
+
+    // Cross-device sync: Supabase Realtime channel
+    let channel: ReturnType<NonNullable<typeof supabase>['channel']> | null = null;
+    if (isSupabaseConfigured && supabase) {
+      channel = supabase
+        .channel('admin_services_sync')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'services' },
+          async () => {
+            try {
+              const freshServices = await db.getServices(false);
+              setServices(freshServices);
+            } catch (e) {
+              console.warn('Realtime services sync error in admin:', e);
+            }
+          }
+        )
+        .subscribe();
+    }
+
+    return () => {
+      window.removeEventListener('focus', fetchServices);
+      if (channel && supabase) {
+        supabase.removeChannel(channel);
+      }
+    };
   }, []);
 
   const handleUpdate = (id: string, updates: Partial<ServiceItem>) => {

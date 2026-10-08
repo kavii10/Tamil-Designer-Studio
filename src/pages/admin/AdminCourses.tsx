@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { CourseItem, CourseStageSyllabus } from '../../types';
 import { db, DEFAULT_COURSES, DEFAULT_STAGE_SYLLABUSES } from '../../services/db';
+import { supabase, isSupabaseConfigured } from '../../lib/supabase';
 import { SyllabusPdfModal } from '../../components/studio/SyllabusPdfModal';
 import { downloadPdf, generateStageSyllabusPdf } from '../../utils/pdfGenerator';
 import { Lang } from '../../i18n/translations';
@@ -64,6 +65,36 @@ export const AdminCourses: React.FC<AdminCoursesProps> = ({
       }
     }
     fetchData();
+
+    // Cross-device sync: listen for window focus
+    window.addEventListener('focus', fetchData);
+
+    // Cross-device sync: Supabase Realtime channel
+    let channel: ReturnType<NonNullable<typeof supabase>['channel']> | null = null;
+    if (isSupabaseConfigured && supabase) {
+      channel = supabase
+        .channel('admin_courses_sync')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'courses' },
+          async () => {
+            try {
+              const freshCourses = await db.getCourses(false);
+              setCourses(freshCourses);
+            } catch (e) {
+              console.warn('Realtime courses sync error in admin:', e);
+            }
+          }
+        )
+        .subscribe();
+    }
+
+    return () => {
+      window.removeEventListener('focus', fetchData);
+      if (channel && supabase) {
+        supabase.removeChannel(channel);
+      }
+    };
   }, []);
 
   // ── Stage Syllabus Handlers ──

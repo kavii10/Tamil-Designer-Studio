@@ -34,11 +34,11 @@ export const AcademySpecialities: React.FC<AcademySpecialitiesProps> = ({
                   isDark ? 'text-[#FAF6EE]' : 'text-[#2A170E]'
                 }`}
               >
-                {isTa ? 'எங்கள் அகாடமியின் சிறப்பம்சங்கள்' : 'Our Academy Specialities'}
+                {isTa ? 'எங்கள் அகாடமி சிறப்பம்சங்கள்' : 'Our Academy Specialities'}
               </h3>
               <p className={`text-xs sm:text-[13px] mt-1 leading-relaxed [word-spacing:0.12em] ${isDark ? 'text-[#A7A2B8]' : 'text-[#7C6556]'}`}>
                 {isTa
-                  ? 'எங்களிடம் ஃபேஷன் டிசைனிங் கற்பது தனித்துவமானது, விரைவானது மற்றும் உங்கள் விருப்பத்திற்கேற்ப வடிவமைக்கப்பட்டது'
+                  ? 'எங்களிடம் ஃபேஷன் டிசைனிங் கற்பது ஏன் தனித்துவமானது, விரைவானது மற்றும் உங்கள் விருப்பத்திற்கேற்ப வடிவமைக்கப்பட்டது'
                   : 'Why learning fashion designing with us is unique, faster, and tailored for you'}
               </p>
             </div>
@@ -59,7 +59,7 @@ export const AcademySpecialities: React.FC<AcademySpecialitiesProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
         {/* ── SPECIALITY 1: CUSTOMISED COURSE SELECTION ── */}
         <div
-          className={`relative rounded-3xl p-6 sm:p-8 border-2 transition-all duration-300 hover:shadow-xl flex flex-col justify-between overflow-hidden group ${
+          className={`relative rounded-3xl p-5 sm:p-8 border-2 transition-all duration-300 hover:shadow-xl flex flex-col justify-between overflow-hidden group ${
             isDark
               ? 'bg-gradient-to-br from-[#232032] via-[#1B1927] to-[#14131D] border-[#423C56] hover:border-[#D9A73A]/60'
               : 'bg-gradient-to-br from-[#FFFDF9] via-[#FCF7ED] to-[#F5ECE0] border-[#E5D7C3] hover:border-[#D9B562]'
@@ -69,20 +69,22 @@ export const AcademySpecialities: React.FC<AcademySpecialitiesProps> = ({
           <div className="absolute top-0 right-0 w-36 h-36 bg-[#D9A73A]/10 rounded-full blur-2xl pointer-events-none group-hover:bg-[#D9A73A]/20 transition-all" />
 
           <div className="relative space-y-5 sm:space-y-6">
-            {/* Badge & Number */}
-            <div className="flex items-center justify-between">
+            {/* Badge & Number — with generous gap & width control so they never touch */}
+            <div className="flex items-center justify-between gap-3 min-w-0">
               <span
-                className={`inline-flex items-center gap-2 text-xs font-bold tracking-wide px-3.5 py-1.5 rounded-full border shadow-2xs ${
+                className={`inline-flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs font-bold tracking-normal sm:tracking-wide px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full border shadow-2xs min-w-0 shrink max-w-[calc(100%-3.5rem)] ${
                   isDark
                     ? 'bg-[#D9A73A]/15 border-[#D9A73A]/40 text-[#E8BE56]'
                     : 'bg-[#F2E5D0] border-[#D9B562] text-[#7A500C]'
                 }`}
               >
-                <Sliders className="w-3.5 h-3.5 text-[#D9A73A]" />
-                {isTa ? 'சிறப்பம்சம் 1 • 100% உங்கள் விருப்பம்' : 'Speciality 1 • 100% Flexible'}
+                <Sliders className="w-3.5 h-3.5 text-[#D9A73A] shrink-0" />
+                <span className="truncate">
+                  {isTa ? 'சிறப்பம்சம் 1 • 100% விருப்பம்' : 'Speciality 1 • 100% Flexible'}
+                </span>
               </span>
               <span
-                className={`text-xs font-serif font-black tracking-widest ${
+                className={`text-xs font-serif font-black tracking-widest shrink-0 ml-auto pl-2 ${
                   isDark ? 'text-[#5C5672]' : 'text-[#C5B49E]'
                 }`}
               >
@@ -127,7 +129,7 @@ export const AcademySpecialities: React.FC<AcademySpecialitiesProps> = ({
               <p className="leading-relaxed sm:leading-loose">
                 {isTa ? (
                   <>
-                    உங்களுக்கு <strong className={isDark ? 'text-[#FAF6EE]' : 'text-[#160E07]'}>பிளவுஸ்</strong> மற்றும் <strong className={isDark ? 'text-[#FAF6EE]' : 'text-[#160E07]'}>குர்த்தி வகைகள்</strong> மட்டுமே கற்க வேண்டும் என்றால், அந்தப் பாடப் பிரிவுகளை மட்டும் தேர்வு செய்து படிக்கலாம்.
+                    உங்களுக்கு <strong className={isDark ? 'text-[#FAF6EE]' : 'text-[#160E07]'}>பிளவுஸ்</strong> மற்றும் <strong className={isDark ? 'text-[#FAF6EE]' : 'text-[#160E07]'}>குர்தி வகைகள்</strong> மட்டுமே கற்க வேண்டும் என்றால், அந்தப் பாடப் பிரிவுகளை மட்டும் தேர்வு செய்து படிக்கலாம்.
                   </>
                 ) : (
                   <>
@@ -143,7 +145,7 @@ export const AcademySpecialities: React.FC<AcademySpecialitiesProps> = ({
                 <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-1" />
                 <span className={`leading-relaxed sm:leading-loose ${isDark ? 'text-[#D1CADB]' : 'text-[#5C4535]'}`}>
                   {isTa
-                    ? 'தனித்தனி பாடப் பிரிவுகளை தேர்வு செய்யலாம் (பிளவுஸ், குர்த்தி, பேண்ட், மேக்ஸி கவுன் அல்லது வெஸ்டர்ன் ஆடைகள்)'
+                    ? 'தனித்தனி பாடப் பிரிவுகளை தேர்வு செய்யலாம் (பிளவுஸ், குர்தி, பேண்ட், மேக்ஸி கவுன் அல்லது வெஸ்டர்ன் ஆடைகள்)'
                     : 'Choose individual modules (Blouses, Kurtis, Pants, Maxi Gowns, or Western)'}
                 </span>
               </li>
@@ -151,7 +153,7 @@ export const AcademySpecialities: React.FC<AcademySpecialitiesProps> = ({
                 <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-1" />
                 <span className={`leading-relaxed sm:leading-loose ${isDark ? 'text-[#D1CADB]' : 'text-[#5C4535]'}`}>
                   {isTa
-                    ? 'உங்கள் விற்பனையகம் தேவைக்கு மட்டும் கவனம் செலுத்துவதன் மூலம் நேரத்தையும், பணத்தையும் மிச்சப்படுத்துங்கள்'
+                    ? 'உங்கள் பொட்டிக் தேவைக்கு மட்டும் கவனம் செலுத்துவதன் மூலம் நேரத்தையும் பணத்தையும் மிச்சப்படுத்துங்கள்'
                     : 'Save time & money by focusing only on your boutique requirements'}
                 </span>
               </li>
@@ -169,7 +171,7 @@ export const AcademySpecialities: React.FC<AcademySpecialitiesProps> = ({
 
         {/* ── SPECIALITY 2: 100% POWER MACHINE TRAINING ── */}
         <div
-          className={`relative rounded-3xl p-6 sm:p-8 border-2 transition-all duration-300 hover:shadow-xl flex flex-col justify-between overflow-hidden group ${
+          className={`relative rounded-3xl p-5 sm:p-8 border-2 transition-all duration-300 hover:shadow-xl flex flex-col justify-between overflow-hidden group ${
             isDark
               ? 'bg-gradient-to-br from-[#232032] via-[#1B1927] to-[#14131D] border-[#423C56] hover:border-[#D9A73A]/60'
               : 'bg-gradient-to-br from-[#FFFDF9] via-[#FCF7ED] to-[#F5ECE0] border-[#E5D7C3] hover:border-[#D9B562]'
@@ -179,20 +181,22 @@ export const AcademySpecialities: React.FC<AcademySpecialitiesProps> = ({
           <div className="absolute top-0 right-0 w-36 h-36 bg-[#E8BE56]/10 rounded-full blur-2xl pointer-events-none group-hover:bg-[#E8BE56]/20 transition-all" />
 
           <div className="relative space-y-5 sm:space-y-6">
-            {/* Badge & Number */}
-            <div className="flex items-center justify-between">
+            {/* Badge & Number — with generous gap & width control so they never touch */}
+            <div className="flex items-center justify-between gap-3 min-w-0">
               <span
-                className={`inline-flex items-center gap-2 text-xs font-bold tracking-wide px-3.5 py-1.5 rounded-full border shadow-2xs ${
+                className={`inline-flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs font-bold tracking-normal sm:tracking-wide px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full border shadow-2xs min-w-0 shrink max-w-[calc(100%-3.5rem)] ${
                   isDark
                     ? 'bg-[#E8BE56]/15 border-[#E8BE56]/40 text-[#E8BE56]'
                     : 'bg-[#F2E5D0] border-[#D9B562] text-[#7A500C]'
                 }`}
               >
-                <Zap className="w-3.5 h-3.5 text-[#E8BE56] fill-current" />
-                {isTa ? 'சிறப்பம்சம் 2 • 100% பவர் மெஷின் பயிற்சி' : 'Speciality 2 • 100% Power Machines'}
+                <Zap className="w-3.5 h-3.5 text-[#E8BE56] fill-current shrink-0" />
+                <span className="truncate">
+                  {isTa ? 'சிறப்பம்சம் 2 • 100% பவர் மெஷின்' : 'Speciality 2 • 100% Power Machines'}
+                </span>
               </span>
               <span
-                className={`text-xs font-serif font-black tracking-widest ${
+                className={`text-xs font-serif font-black tracking-widest shrink-0 ml-auto pl-2 ${
                   isDark ? 'text-[#5C5672]' : 'text-[#C5B49E]'
                 }`}
               >
@@ -261,7 +265,7 @@ export const AcademySpecialities: React.FC<AcademySpecialitiesProps> = ({
                 <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-1" />
                 <span className={`leading-relaxed sm:leading-loose ${isDark ? 'text-[#D1CADB]' : 'text-[#5C4535]'}`}>
                   {isTa
-                    ? 'தொழில்முறை விற்பனையகம் & கார்மென்ட்ஸ் தரத்திலான தையல் ஃபினிஷிங் மற்றும் வேகத்தை உடனடியாக அடையுங்கள்'
+                    ? 'தொழில்முறை பொட்டிக் & கார்மென்ட்ஸ் தரத்திலான தையல் ஃபினிஷிங் மற்றும் வேகத்தை உடனடியாக அடையுங்கள்'
                     : 'Attain professional boutique & factory-level finish and speed immediately'}
                 </span>
               </li>

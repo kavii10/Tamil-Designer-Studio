@@ -6,29 +6,26 @@
 -- ==============================================================================
 
 -- 1. ADD BILINGUAL (TAMIL) COLUMNS TO BUSINESS SETTINGS
-ALTER TABLE public.business_settings
-  ADD COLUMN IF NOT EXISTS business_name_ta    VARCHAR(255) DEFAULT 'Tamil Designer Studio',
-  ADD COLUMN IF NOT EXISTS subtitle_ta         VARCHAR(255) DEFAULT 'ஃபேஷன் டிசைன் & தையல் பள்ளி',
-  ADD COLUMN IF NOT EXISTS tagline_ta          VARCHAR(255) DEFAULT 'கனவுகளை அணியுங்கள், வெறும் ஆடைகளை அல்ல.',
-  ADD COLUMN IF NOT EXISTS quote_ta            VARCHAR(255) DEFAULT 'துணி கற்பனையுடன் சந்திக்கும் இடம்',
-  ADD COLUMN IF NOT EXISTS address_line1_ta    VARCHAR(255) DEFAULT '1/208 C, ஜீவா தெரு',
-  ADD COLUMN IF NOT EXISTS address_line2_ta    VARCHAR(255) DEFAULT 'சின்னியம்பாளையம்',
-  ADD COLUMN IF NOT EXISTS address_city_ta     VARCHAR(100) DEFAULT 'கோயம்புத்தூர்',
-  ADD COLUMN IF NOT EXISTS timings_weekdays_ta VARCHAR(255) DEFAULT 'திங்கள் - சனி: காலை 9:00 - மதியம் 1:00 & மாலை 3:00 - இரவு 8:00';
+ALTER TABLE public.business_settings ADD COLUMN IF NOT EXISTS business_name_ta VARCHAR(255) DEFAULT 'Tamil Designer Studio';
+ALTER TABLE public.business_settings ADD COLUMN IF NOT EXISTS subtitle_ta VARCHAR(255) DEFAULT 'ஃபேஷன் டிசைன் & தையல் பள்ளி';
+ALTER TABLE public.business_settings ADD COLUMN IF NOT EXISTS tagline_ta VARCHAR(255) DEFAULT 'கனவுகளை அணியுங்கள், வெறும் ஆடைகளை அல்ல.';
+ALTER TABLE public.business_settings ADD COLUMN IF NOT EXISTS quote_ta VARCHAR(255) DEFAULT 'துணி கற்பனையுடன் சந்திக்கும் இடம்';
+ALTER TABLE public.business_settings ADD COLUMN IF NOT EXISTS address_line1_ta VARCHAR(255) DEFAULT '1/208 C, ஜீவா தெரு';
+ALTER TABLE public.business_settings ADD COLUMN IF NOT EXISTS address_line2_ta VARCHAR(255) DEFAULT 'சின்னியம்பாளையம்';
+ALTER TABLE public.business_settings ADD COLUMN IF NOT EXISTS address_city_ta VARCHAR(100) DEFAULT 'கோயம்புத்தூர்';
+ALTER TABLE public.business_settings ADD COLUMN IF NOT EXISTS timings_weekdays_ta VARCHAR(255) DEFAULT 'திங்கள் - சனி: காலை 9:00 - மதியம் 1:00 & மாலை 3:00 - இரவு 8:00';
 
 -- 2. ADD BILINGUAL (TAMIL) COLUMNS TO COURSES
-ALTER TABLE public.courses
-  ADD COLUMN IF NOT EXISTS title_ta       VARCHAR(255),
-  ADD COLUMN IF NOT EXISTS level_ta       VARCHAR(100),
-  ADD COLUMN IF NOT EXISTS badge_ta       VARCHAR(100),
-  ADD COLUMN IF NOT EXISTS description_ta TEXT,
-  ADD COLUMN IF NOT EXISTS topics_ta      JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE public.courses ADD COLUMN IF NOT EXISTS title_ta VARCHAR(255);
+ALTER TABLE public.courses ADD COLUMN IF NOT EXISTS level_ta VARCHAR(100);
+ALTER TABLE public.courses ADD COLUMN IF NOT EXISTS badge_ta VARCHAR(100);
+ALTER TABLE public.courses ADD COLUMN IF NOT EXISTS description_ta TEXT;
+ALTER TABLE public.courses ADD COLUMN IF NOT EXISTS topics_ta JSONB DEFAULT '[]'::jsonb;
 
 -- 3. ADD BILINGUAL (TAMIL) COLUMNS TO SERVICES
-ALTER TABLE public.services
-  ADD COLUMN IF NOT EXISTS title_ta       VARCHAR(255),
-  ADD COLUMN IF NOT EXISTS description_ta TEXT,
-  ADD COLUMN IF NOT EXISTS items_ta       JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE public.services ADD COLUMN IF NOT EXISTS title_ta VARCHAR(255);
+ALTER TABLE public.services ADD COLUMN IF NOT EXISTS description_ta TEXT;
+ALTER TABLE public.services ADD COLUMN IF NOT EXISTS items_ta JSONB DEFAULT '[]'::jsonb;
 
 -- 4. UPDATE STORAGE BUCKET TO ALLOW SYLLABUS PDF FILES & RAISE LIMIT TO 25MB
 INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)

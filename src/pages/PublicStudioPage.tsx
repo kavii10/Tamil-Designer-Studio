@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { InstagramIcon } from '../components/icons/InstagramIcon';
 import { db, DEFAULT_STAGE_SYLLABUSES } from '../services/db';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { BusinessSettings, CourseItem, CourseStageSyllabus, ServiceItem } from '../types';
 import { ServiceCard } from '../components/studio/ServiceCard';
 import { CourseCard } from '../components/studio/CourseCard';
@@ -1076,12 +1077,72 @@ export const PublicStudioPage: React.FC = () => {
     window.addEventListener('tds_stage_syllabuses_updated', handleStagesUpdate);
     window.addEventListener('storage', handleStorageChange);
 
+    // Cross-device sync: Refetch when window regains focus or visibility
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        loadData();
+      }
+    };
+    window.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', loadData);
+
+    // Cross-device real-time sync with Supabase Realtime
+    let channel: ReturnType<NonNullable<typeof supabase>['channel']> | null = null;
+    if (isSupabaseConfigured && supabase) {
+      channel = supabase
+        .channel('tds_public_live_sync')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'business_settings' },
+          async () => {
+            try {
+              const freshSettings = await db.getBusinessSettings();
+              setSettings(freshSettings);
+            } catch (e) {
+              console.warn('Realtime settings sync error:', e);
+            }
+          }
+        )
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'courses' },
+          async () => {
+            try {
+              const freshCourses = await db.getCourses(true);
+              setCourses(
+                freshCourses.filter((c) => !c.title.toLowerCase().includes('boutique business'))
+              );
+            } catch (e) {
+              console.warn('Realtime courses sync error:', e);
+            }
+          }
+        )
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'services' },
+          async () => {
+            try {
+              const freshServices = await db.getServices(true);
+              setServices(freshServices);
+            } catch (e) {
+              console.warn('Realtime services sync error:', e);
+            }
+          }
+        )
+        .subscribe();
+    }
+
     return () => {
       window.removeEventListener('tds_settings_updated', handleSettingsUpdate);
       window.removeEventListener('tds_services_updated', handleServicesUpdate);
       window.removeEventListener('tds_courses_updated', handleCoursesUpdate);
       window.removeEventListener('tds_stage_syllabuses_updated', handleStagesUpdate);
       window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', loadData);
+      if (channel && supabase) {
+        supabase.removeChannel(channel);
+      }
     };
   }, []);
 
