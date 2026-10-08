@@ -27,6 +27,19 @@ import { SyllabusPdfModal } from '../../components/studio/SyllabusPdfModal';
 import { downloadPdf, generateStageSyllabusPdf } from '../../utils/pdfGenerator';
 import { Lang } from '../../i18n/translations';
 
+function getErrorMessage(error: unknown, fallback: string): string {
+  if (error instanceof Error) return error.message;
+  if (
+    error &&
+    typeof error === 'object' &&
+    'message' in error &&
+    typeof error.message === 'string'
+  ) {
+    return error.message;
+  }
+  return fallback;
+}
+
 interface AdminCoursesProps {
   editLang?: Lang;
   onLangChange?: (lang: Lang) => void;
@@ -44,6 +57,7 @@ export const AdminCourses: React.FC<AdminCoursesProps> = ({
   const [stageSaveSuccess, setStageSaveSuccess] = useState(false);
   const [uploadingStageId, setUploadingStageId] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [previewStage, setPreviewStage] = useState<CourseStageSyllabus | null>(null);
 
   const isTa = editLang === 'ta';
@@ -83,6 +97,18 @@ export const AdminCourses: React.FC<AdminCoursesProps> = ({
               setCourses(freshCourses);
             } catch (e) {
               console.warn('Realtime courses sync error in admin:', e);
+            }
+          }
+        )
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'course_stage_syllabuses' },
+          async () => {
+            try {
+              const freshStages = await db.getStageSyllabuses();
+              setStageSyllabuses(freshStages);
+            } catch (e) {
+              console.warn('Realtime syllabus sync error in admin:', e);
             }
           }
         )
@@ -127,12 +153,12 @@ export const AdminCourses: React.FC<AdminCoursesProps> = ({
             }
           : s
       );
-      setStageSyllabuses(updated);
       await db.saveStageSyllabuses(updated);
+      setStageSyllabuses(updated);
       setStageSaveSuccess(true);
       setTimeout(() => setStageSaveSuccess(false), 4000);
-    } catch (err: any) {
-      setUploadError(err?.message || 'Failed to upload syllabus PDF. Please try again.');
+    } catch (err) {
+      setUploadError(getErrorMessage(err, 'Failed to upload syllabus PDF. Please try again.'));
     } finally {
       setUploadingStageId(null);
       // Reset input value so re-selecting same file triggers onChange
@@ -155,10 +181,10 @@ export const AdminCourses: React.FC<AdminCoursesProps> = ({
               }
             : s
         );
-        setStageSyllabuses(updated);
         await db.saveStageSyllabuses(updated);
+        setStageSyllabuses(updated);
       } catch (err) {
-        console.error(err);
+        setSaveError(getErrorMessage(err, 'Failed to remove the syllabus PDF.'));
       }
     }
   };
@@ -166,11 +192,12 @@ export const AdminCourses: React.FC<AdminCoursesProps> = ({
   const handleSaveStageSyllabuses = async () => {
     try {
       setSaving(true);
+      setSaveError(null);
       await db.saveStageSyllabuses(stageSyllabuses);
       setStageSaveSuccess(true);
       setTimeout(() => setStageSaveSuccess(false), 4000);
     } catch (err) {
-      console.error(err);
+      setSaveError(getErrorMessage(err, 'Failed to save syllabus changes.'));
     } finally {
       setSaving(false);
     }
@@ -270,6 +297,7 @@ export const AdminCourses: React.FC<AdminCoursesProps> = ({
   const handleSaveAll = async () => {
     try {
       setSaving(true);
+      setSaveError(null);
       await Promise.all([
         db.saveCourses(courses),
         db.saveStageSyllabuses(stageSyllabuses),
@@ -277,7 +305,7 @@ export const AdminCourses: React.FC<AdminCoursesProps> = ({
       setSavedSuccess(true);
       setTimeout(() => setSavedSuccess(false), 4000);
     } catch (err) {
-      console.error(err);
+      setSaveError(getErrorMessage(err, 'Failed to save course changes.'));
     } finally {
       setSaving(false);
     }
@@ -360,6 +388,13 @@ export const AdminCourses: React.FC<AdminCoursesProps> = ({
         <div className="p-3.5 bg-red-50 border border-red-200 text-red-800 text-xs rounded-xl flex items-center gap-2 animate-fadeIn">
           <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
           <span>{uploadError}</span>
+        </div>
+      )}
+
+      {saveError && (
+        <div className="p-3.5 bg-red-50 border border-red-200 text-red-800 text-xs rounded-xl flex items-center gap-2 animate-fadeIn">
+          <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+          <span>{saveError}</span>
         </div>
       )}
 

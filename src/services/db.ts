@@ -14,6 +14,19 @@ import {
   removePdfFromStorage,
 } from '../utils/pdfStorage';
 
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  if (
+    error &&
+    typeof error === 'object' &&
+    'message' in error &&
+    typeof error.message === 'string'
+  ) {
+    return error.message;
+  }
+  return 'Unknown storage error.';
+}
+
 // Default initial state matching Tamil Designer Studio specifications
 const DEFAULT_BUSINESS_SETTINGS: BusinessSettings = {
   id: '00000000-0000-0000-0000-000000000002',
@@ -1028,14 +1041,12 @@ export const db = {
         let q = supabase.from('courses').select('*').order('sort_order', { ascending: true });
         if (activeOnly) q = q.eq('is_active', true);
         const { data, error } = await q;
-        if (!error && data && data.length > 0) {
-          const hasSyllabus = data.some((c: any) => c.title && c.title.toLowerCase().includes('blouse'));
-          if (hasSyllabus) {
-            if (!activeOnly) {
-              setLocalData(STORAGE_KEYS.COURSES, data);
-            }
-            return data as CourseItem[];
+        if (error) throw error;
+        if (data) {
+          if (!activeOnly) {
+            setLocalData(STORAGE_KEYS.COURSES, data);
           }
+          return data as CourseItem[];
         }
       } catch (err) {
         console.warn('Supabase courses fetch failed:', err);
@@ -1051,21 +1062,30 @@ export const db = {
   },
 
   async saveCourses(courses: CourseItem[]): Promise<CourseItem[]> {
-    setLocalData(STORAGE_KEYS.COURSES, courses);
-
     if (isSupabaseConfigured && supabase) {
-      try {
+      if (courses.length > 0) {
         const { error } = await supabase
           .from('courses')
           .upsert(courses, { onConflict: 'id' });
-        if (error) {
-          console.warn('Supabase saveCourses error:', error);
-        }
-      } catch (err) {
-        console.warn('Supabase saveCourses failed:', err);
+        if (error) throw error;
+      }
+
+      const { data: existingCourses, error: fetchError } = await supabase
+        .from('courses')
+        .select('id');
+      if (fetchError) throw fetchError;
+
+      const retainedIds = new Set(courses.map((course) => course.id));
+      const removedIds = (existingCourses || [])
+        .map((course) => course.id as string)
+        .filter((id) => !retainedIds.has(id));
+      if (removedIds.length > 0) {
+        const { error } = await supabase.from('courses').delete().in('id', removedIds);
+        if (error) throw error;
       }
     }
 
+    setLocalData(STORAGE_KEYS.COURSES, courses);
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('tds_courses_updated', { detail: courses }));
     }
@@ -1113,33 +1133,66 @@ export const db = {
       DEFAULT_STAGE_SYLLABUSES
     );
 
-    // Merge or load PDF content from IndexedDB if not already in memory
-    const updated = await Promise.all(
+    if (isSupabaseConfigured && supabase) {
+      try {
+        const { data, error } = await supabase
+          .from('course_stage_syllabuses')
+          .select('*');
+        if (error) throw error;
+        if (data && data.length > 0) {
+          const savedStages = new Map(
+            (data as CourseStageSyllabus[]).map((stage) => [stage.id, stage])
+          );
+          const cloudStages = DEFAULT_STAGE_SYLLABUSES.map((defaultStage) => ({
+            ...defaultStage,
+            ...savedStages.get(defaultStage.id),
+          }));
+          setLocalData(
+            STORAGE_KEYS.STAGE_SYLLABUSES,
+            cloudStages.map((stage) => ({
+              ...stage,
+              pdf_url: stage.pdf_url?.startsWith('http') ? stage.pdf_url : '',
+            }))
+          );
+          return cloudStages;
+        }
+      } catch (err) {
+        console.warn('Supabase stage syllabus fetch failed:', err);
+      }
+    }
+
+    return Promise.all(
       cached.map(async (stage) => {
         if (!stage.pdf_url) {
           const storedPdf = await getPdfFromStorage(stage.id);
-          if (storedPdf) {
-            return { ...stage, pdf_url: storedPdf };
-          }
+          if (storedPdf) return { ...stage, pdf_url: storedPdf };
         }
         return stage;
       })
     );
-
-    return updated;
   },
 
   async saveStageSyllabuses(stages: CourseStageSyllabus[]): Promise<CourseStageSyllabus[]> {
-    // Save metadata to local storage (strip giant data URL from local storage to keep quota safe)
+    if (isSupabaseConfigured && supabase) {
+      const cloudStages = stages.map((stage) => ({
+        ...stage,
+        pdf_url: stage.pdf_url?.startsWith('http') ? stage.pdf_url : null,
+        updated_at: stage.updated_at || new Date().toISOString(),
+      }));
+      const { error } = await supabase
+        .from('course_stage_syllabuses')
+        .upsert(cloudStages, { onConflict: 'id' });
+      if (error) throw error;
+    }
+
     const metadataOnly = stages.map((s) => ({
       ...s,
       pdf_url: s.pdf_url && s.pdf_url.startsWith('http') ? s.pdf_url : '', // keep remote URLs, strip data URLs from LS
     }));
     setLocalData(STORAGE_KEYS.STAGE_SYLLABUSES, metadataOnly);
 
-    // Save full data URLs in IndexedDB
     for (const stage of stages) {
-      if (stage.pdf_url) {
+      if (stage.pdf_url?.startsWith('data:')) {
         await savePdfToStorage(stage.id, stage.pdf_url);
       } else {
         await removePdfFromStorage(stage.id);
@@ -1175,21 +1228,24 @@ export const db = {
         const cleanName = `${stageId}_syllabus_${Date.now()}.pdf`;
         const { error } = await supabase.storage
           .from('studio-images')
-          .upload(cleanName, file, { contentType: 'application/pdf', upsert: true });
+          .upload(cleanName, file, {
+            contentType: 'application/pdf',
+            cacheControl: '0',
+            upsert: true,
+          });
 
-        if (!error) {
-          const publicUrl = supabase.storage
-            .from('studio-images')
-            .getPublicUrl(cleanName).data.publicUrl;
-          await savePdfToStorage(stageId, publicUrl);
-          return {
-            pdf_url: publicUrl,
-            pdf_name: file.name,
-            pdf_size: fileSizeFormatted,
-          };
-        }
+        if (error) throw error;
+        const publicUrl = supabase.storage
+          .from('studio-images')
+          .getPublicUrl(cleanName).data.publicUrl;
+        return {
+          pdf_url: publicUrl,
+          pdf_name: file.name,
+          pdf_size: fileSizeFormatted,
+        };
       } catch (err) {
-        console.warn('Supabase PDF upload skipped/failed, using local storage:', err);
+        console.error('Supabase PDF upload failed:', err);
+        throw new Error(`Cloud PDF upload failed: ${getErrorMessage(err)}`);
       }
     }
 
@@ -1216,18 +1272,5 @@ export const db = {
 
   async deleteStageSyllabusPdf(stageId: string): Promise<void> {
     await removePdfFromStorage(stageId);
-    const stages = await this.getStageSyllabuses();
-    const updated = stages.map((s) =>
-      s.id === stageId
-        ? {
-            ...s,
-            pdf_url: undefined,
-            pdf_name: undefined,
-            pdf_size: undefined,
-            updated_at: new Date().toISOString(),
-          }
-        : s
-    );
-    await this.saveStageSyllabuses(updated);
   },
 };

@@ -1119,6 +1119,18 @@ export const PublicStudioPage: React.FC = () => {
         )
         .on(
           'postgres_changes',
+          { event: '*', schema: 'public', table: 'course_stage_syllabuses' },
+          async () => {
+            try {
+              const freshStages = await db.getStageSyllabuses();
+              setStageSyllabuses(freshStages);
+            } catch (e) {
+              console.warn('Realtime syllabus sync error:', e);
+            }
+          }
+        )
+        .on(
+          'postgres_changes',
           { event: '*', schema: 'public', table: 'services' },
           async () => {
             try {

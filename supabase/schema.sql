@@ -84,6 +84,28 @@ CREATE TABLE IF NOT EXISTS public.courses (
     created_at     TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- ── 5. COURSE STAGE SYLLABUSES ────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS public.course_stage_syllabuses (
+    id             VARCHAR(32) PRIMARY KEY,
+    stage_key      VARCHAR(32) NOT NULL,
+    level          TEXT NOT NULL,
+    level_ta       TEXT,
+    title          TEXT NOT NULL,
+    title_ta       TEXT,
+    badge          TEXT NOT NULL,
+    badge_ta       TEXT,
+    duration       TEXT NOT NULL DEFAULT '',
+    duration_ta    TEXT,
+    description    TEXT NOT NULL DEFAULT '',
+    description_ta TEXT,
+    highlights     JSONB NOT NULL DEFAULT '[]'::jsonb,
+    highlights_ta  JSONB DEFAULT '[]'::jsonb,
+    pdf_url        TEXT,
+    pdf_name       TEXT,
+    pdf_size       TEXT,
+    updated_at     TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- ── 5. SCAN LOGS ─────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS public.scan_logs (
     id           UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -120,19 +142,22 @@ CREATE TRIGGER trg_settings_updated BEFORE UPDATE ON public.business_settings FO
 ALTER TABLE public.qr_codes         ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.business_settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.courses           ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.course_stage_syllabuses ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.services          ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.scan_logs         ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "allow_all_qr_codes"          ON public.qr_codes;
 DROP POLICY IF EXISTS "allow_all_business_settings" ON public.business_settings;
 DROP POLICY IF EXISTS "allow_all_courses"           ON public.courses;
+DROP POLICY IF EXISTS "allow_all_course_stage_syllabuses" ON public.course_stage_syllabuses;
 DROP POLICY IF EXISTS "allow_all_services"          ON public.services;
 DROP POLICY IF EXISTS "allow_all_scan_logs"         ON public.scan_logs;
 
 CREATE POLICY "allow_all_qr_codes"          ON public.qr_codes          FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "allow_all_business_settings" ON public.business_settings  FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "allow_all_courses"           ON public.courses            FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "allow_all_services"          ON public.services           FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "allow_all_course_stage_syllabuses" ON public.course_stage_syllabuses FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "allow_all_services"          ON public.services          FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "allow_all_scan_logs"         ON public.scan_logs          FOR ALL USING (true) WITH CHECK (true);
 
 -- ── PUBLIC SERVICE IMAGE STORAGE ─────────────────────────────────────────────
