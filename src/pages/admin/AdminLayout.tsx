@@ -13,10 +13,12 @@ import {
   X,
   Sparkles,
   Database,
-  CheckCircle2
+  CheckCircle2,
+  Languages,
 } from 'lucide-react';
 import { isSupabaseConfigured } from '../../lib/supabase';
 import { authService } from '../../services/auth';
+import { Lang } from '../../i18n/translations';
 
 export type AdminTab =
   | 'dashboard'
@@ -31,6 +33,8 @@ interface AdminLayoutProps {
   currentTab: AdminTab;
   onTabChange: (tab: AdminTab) => void;
   onLogout: () => void;
+  editLang?: Lang;
+  onLangChange?: (lang: Lang) => void;
   children: React.ReactNode;
 }
 
@@ -38,6 +42,8 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
   currentTab,
   onTabChange,
   onLogout,
+  editLang = 'en',
+  onLangChange,
   children,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -75,12 +81,25 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
           </div>
         </div>
 
-        <button
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="p-2 rounded-lg bg-studio-800 text-cream-100 hover:text-white"
-        >
-          {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-        </button>
+        <div className="flex items-center gap-2">
+          {onLangChange && (
+            <button
+              type="button"
+              onClick={() => onLangChange(editLang === 'en' ? 'ta' : 'en')}
+              className="px-2.5 py-1.5 rounded-lg border border-gold-500/40 bg-studio-800 text-gold-300 text-xs font-bold flex items-center gap-1 active:scale-95"
+              title="Toggle Language / மொழி மாற்று"
+            >
+              <Languages className="w-3.5 h-3.5" />
+              <span>{editLang === 'en' ? 'தமிழ்' : 'English'}</span>
+            </button>
+          )}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="p-2 rounded-lg bg-studio-800 text-cream-100 hover:text-white"
+          >
+            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+        </div>
       </header>
 
       {/* Sidebar Navigation */}
@@ -89,9 +108,9 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
           mobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
         }`}
       >
-        <div className="space-y-6">
+        <div className="space-y-5">
           {/* Logo & Branding */}
-          <div className="flex items-center gap-3 pb-5 border-b border-studio-800">
+          <div className="flex items-center gap-3 pb-4 border-b border-studio-800">
             <img
               src="/logo.png"
               alt="Tamil Designer Studio Logo"
@@ -106,6 +125,45 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
               </p>
             </div>
           </div>
+
+          {/* Edit Language Switcher in Sidebar */}
+          {onLangChange && (
+            <div className="p-2.5 rounded-xl bg-studio-800/90 border border-gold-500/30 space-y-1.5">
+              <div className="flex items-center justify-between text-[11px] text-studio-400">
+                <span className="flex items-center gap-1.5 text-gold-400 font-medium">
+                  <Languages className="w-3.5 h-3.5" />
+                  Edit Language:
+                </span>
+                <span className="font-bold text-cream-100 uppercase tracking-wider text-[10px]">
+                  {editLang === 'ta' ? 'தமிழ்' : 'English'}
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-1.5 bg-studio-950/60 p-1 rounded-lg border border-studio-800">
+                <button
+                  type="button"
+                  onClick={() => onLangChange('en')}
+                  className={`py-1 rounded-md text-xs font-bold transition-all ${
+                    editLang === 'en'
+                      ? 'bg-gold-500 text-studio-950 shadow-sm'
+                      : 'text-cream-300 hover:text-white'
+                  }`}
+                >
+                  English
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onLangChange('ta')}
+                  className={`py-1 rounded-md text-xs font-bold transition-all ${
+                    editLang === 'ta'
+                      ? 'bg-gold-500 text-studio-950 shadow-sm'
+                      : 'text-cream-300 hover:text-white'
+                  }`}
+                >
+                  தமிழ்
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Database Mode Status */}
           <div className="px-3 py-2 rounded-xl bg-studio-800/80 border border-studio-700/60 flex items-center justify-between text-[11px]">
@@ -151,6 +209,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
         <div className="space-y-2 pt-6 border-t border-studio-800">
           <a
             href="/tamil-designer-studio"
+            onClick={() => authService.logout()}
             className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs text-gold-300 hover:text-white bg-studio-800/80 hover:bg-studio-800 transition-colors font-medium border border-studio-700/60"
           >
             <span className="flex items-center gap-2">
@@ -182,7 +241,54 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
       )}
 
       {/* Main Page Area */}
-      <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full">
+      <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full space-y-4">
+        {/* Top Language Banner for Content Editing Tabs */}
+        {onLangChange && (currentTab === 'profile' || currentTab === 'courses' || currentTab === 'services') && (
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white border border-beige-300 rounded-2xl p-3 px-4 shadow-xs">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-gold-100 text-gold-800 flex items-center justify-center shrink-0">
+                <Languages className="w-4 h-4" />
+              </div>
+              <div>
+                <span className="text-xs font-bold text-studio-900 block leading-tight">
+                  {editLang === 'ta' ? 'தமிழ் மொழி திருத்துதல் முறை (Tamil Edit Mode)' : 'English Content Edit Mode'}
+                </span>
+                <span className="text-[11px] text-studio-500">
+                  {editLang === 'ta' ? 'நீங்கள் செய்யும் மாற்றங்கள் தமிழ் பதிப்பில் சேமிக்கப்படும்' : 'Changes you make will save to the English version'}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-1.5 shrink-0 self-end sm:self-auto">
+              <span className="text-[11px] text-studio-500 font-medium mr-1 hidden sm:inline">Switch:</span>
+              <div className="inline-flex rounded-xl p-1 bg-cream-100 border border-beige-300">
+                <button
+                  type="button"
+                  onClick={() => onLangChange('en')}
+                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                    editLang === 'en'
+                      ? 'bg-studio-900 text-gold-300 shadow-sm'
+                      : 'text-studio-700 hover:text-studio-900'
+                  }`}
+                >
+                  English
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onLangChange('ta')}
+                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                    editLang === 'ta'
+                      ? 'bg-studio-900 text-gold-300 shadow-sm'
+                      : 'text-studio-700 hover:text-studio-900'
+                  }`}
+                >
+                  தமிழ்
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {children}
       </main>
     </div>

@@ -12,11 +12,26 @@ import { AdminServices } from './pages/admin/AdminServices';
 import { AdminAnalytics } from './pages/admin/AdminAnalytics';
 import { AdminSettings } from './pages/admin/AdminSettings';
 import { authService } from './services/auth';
+import { Lang } from './i18n/translations';
 
 export const App: React.FC = () => {
   const [currentPath, setCurrentPath] = useState<string>(window.location.pathname);
   const [adminTab, setAdminTab] = useState<AdminTab>('dashboard');
   const [authKey, setAuthKey] = useState<number>(0);
+  const [adminLang, setAdminLang] = useState<Lang>(() => {
+    try {
+      return (localStorage.getItem('tds_admin_edit_lang') as Lang) || 'en';
+    } catch {
+      return 'en';
+    }
+  });
+
+  const handleAdminLangChange = (l: Lang) => {
+    setAdminLang(l);
+    try {
+      localStorage.setItem('tds_admin_edit_lang', l);
+    } catch {}
+  };
 
   useEffect(() => {
     const handlePopState = () => {
@@ -26,6 +41,13 @@ export const App: React.FC = () => {
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
+
+  // Strict Security: Whenever leaving admin portal, immediately lock and require passcode for next visit
+  useEffect(() => {
+    if (!currentPath.startsWith('/admin')) {
+      authService.logout();
+    }
+  }, [currentPath]);
 
   const navigate = (path: string) => {
     window.history.pushState({}, '', path);
@@ -64,6 +86,8 @@ export const App: React.FC = () => {
         key={`admin-${authKey}`}
         currentTab={adminTab}
         onTabChange={(tab) => setAdminTab(tab)}
+        editLang={adminLang}
+        onLangChange={handleAdminLangChange}
         onLogout={() => {
           authService.logout();
           setAuthKey((k) => k + 1);
@@ -72,9 +96,15 @@ export const App: React.FC = () => {
       >
         {adminTab === 'dashboard' && <AdminDashboard onNavigateToTab={setAdminTab} />}
         {adminTab === 'qrcodes' && <AdminQRCodes />}
-        {adminTab === 'profile' && <AdminBusinessProfile />}
-        {adminTab === 'courses' && <AdminCourses />}
-        {adminTab === 'services' && <AdminServices />}
+        {adminTab === 'profile' && (
+          <AdminBusinessProfile editLang={adminLang} onLangChange={handleAdminLangChange} />
+        )}
+        {adminTab === 'courses' && (
+          <AdminCourses editLang={adminLang} onLangChange={handleAdminLangChange} />
+        )}
+        {adminTab === 'services' && (
+          <AdminServices editLang={adminLang} onLangChange={handleAdminLangChange} />
+        )}
         {adminTab === 'analytics' && <AdminAnalytics />}
         {adminTab === 'settings' && <AdminSettings />}
       </AdminLayout>

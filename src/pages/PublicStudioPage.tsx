@@ -18,13 +18,18 @@ import {
   Heart,
   ChevronRight,
   Sparkles,
+  Languages,
 } from 'lucide-react';
 import { InstagramIcon } from '../components/icons/InstagramIcon';
-import { db } from '../services/db';
-import { BusinessSettings, CourseItem, ServiceItem } from '../types';
+import { db, DEFAULT_STAGE_SYLLABUSES } from '../services/db';
+import { BusinessSettings, CourseItem, CourseStageSyllabus, ServiceItem } from '../types';
 import { ServiceCard } from '../components/studio/ServiceCard';
 import { CourseCard } from '../components/studio/CourseCard';
 import { AcademySpecialities } from '../components/studio/AcademySpecialities';
+import { CourseStagesSyllabusSection } from '../components/studio/CourseStagesSyllabusSection';
+import { SyllabusPdfModal } from '../components/studio/SyllabusPdfModal';
+import { useLanguage, getStoredLanguage } from '../hooks/useLanguage';
+import { translations, Lang } from '../i18n/translations';
 
 /* ═══════════════════════════════════════════════
    SPLASH SCREEN (Clean Large Logo, No Star Above)
@@ -101,11 +106,12 @@ const SplashScreen: React.FC<{ onDone: () => void; isDark: boolean; studio?: Bus
         {/* Brand Text Below Logo */}
         <div className="text-center space-y-1.5">
           <p
-            className={`font-serif font-bold text-xl sm:text-2xl tracking-tight ${
+            className={`font-serif font-bold text-xl sm:text-2xl tracking-normal brand-name ${
               isDark ? 'text-[#FAF6EE]' : 'text-[#2A170E]'
             }`}
+            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
           >
-            {studio?.business_name || 'Tamil Designer Studio'}
+            Tamil Designer Studio
           </p>
           <div
             className={`inline-block px-3 py-1 rounded-full border text-[10px] sm:text-xs font-bold uppercase tracking-widest ${
@@ -142,43 +148,154 @@ const SplashScreen: React.FC<{ onDone: () => void; isDark: boolean; studio?: Bus
 };
 
 /* ═══════════════════════════════════════════════
+   LANGUAGE PICKER (First-open screen)
+═══════════════════════════════════════════════ */
+const LanguagePicker: React.FC<{
+  isDark: boolean;
+  onPick: (lang: Lang) => void;
+}> = ({ isDark, onPick }) => {
+  return (
+    <div
+      className={`fixed inset-0 z-50 flex flex-col items-center justify-center px-6 transition-colors duration-300 ${
+        isDark
+          ? 'bg-gradient-to-b from-[#12111A] via-[#0E0E14] to-[#08080C]'
+          : 'bg-gradient-to-b from-[#FAF4EA] via-[#F4E9D8] to-[#ECE0CC]'
+      }`}
+    >
+      {/* Glow */}
+      <div className="absolute w-80 h-80 rounded-full bg-gradient-to-tr from-gold-400/20 to-amber-300/10 blur-3xl pointer-events-none animate-pulse" />
+
+      <div className="relative z-10 w-full max-w-sm space-y-6">
+        {/* Logo */}
+        <div className="flex justify-center">
+          <div
+            className={`w-20 h-20 rounded-2xl overflow-hidden border-2 shadow-xl p-1 ${
+              isDark ? 'border-[#D9A73A]/60 bg-[#1E1D2A]' : 'border-[#D9B562] bg-[#FAF5EC]'
+            }`}
+          >
+            <img src="/logo.png" alt="Tamil Designer Studio" className="w-full h-full object-cover rounded-xl" />
+          </div>
+        </div>
+
+        {/* Title */}
+        <div className="text-center space-y-1.5">
+          <h2
+            className={`text-xl sm:text-2xl font-serif font-bold ${
+              isDark ? 'text-[#FAF6EE]' : 'text-[#2A170E]'
+            }`}
+          >
+            Choose Language / மொழி தேர்வு
+          </h2>
+          <p className={`text-xs ${isDark ? 'text-[#A7A2B8]' : 'text-[#7C6556]'}`}>
+            Tap your preferred language to start &bull; தொடங்க விரும்பும் மொழியைத் தொடவும்
+          </p>
+        </div>
+
+        {/* Language Options — instant click & selection */}
+        <div className="grid grid-cols-2 gap-3.5">
+          {/* English Option */}
+          <button
+            type="button"
+            onClick={() => onPick('en')}
+            className={`group rounded-2xl border-2 p-5 flex flex-col items-center gap-2.5 transition-all active:scale-95 hover:shadow-xl hover:-translate-y-0.5 cursor-pointer ${
+              isDark
+                ? 'border-[#3C384D] bg-[#171622] hover:border-[#D9A73A] hover:bg-[#232030]'
+                : 'border-[#E5D7C3] bg-white hover:border-[#D9B562] hover:bg-[#FFFDF9]'
+            }`}
+          >
+            <span className="text-3xl group-hover:scale-110 transition-transform">🇬🇧</span>
+            <div className="text-center">
+              <span className={`block text-base font-bold ${isDark ? 'text-[#FAF6EE]' : 'text-[#2A170E]'}`}>
+                English
+              </span>
+              <span className={`text-[10px] font-medium ${isDark ? 'text-[#A7A2B8]' : 'text-[#8A7160]'}`}>
+                Continue in English
+              </span>
+            </div>
+            <span className="text-[11px] font-bold text-[#D9A73A] mt-1 group-hover:underline">
+              Select →
+            </span>
+          </button>
+
+          {/* Tamil Option */}
+          <button
+            type="button"
+            onClick={() => onPick('ta')}
+            className={`group rounded-2xl border-2 p-5 flex flex-col items-center gap-2.5 transition-all active:scale-95 hover:shadow-xl hover:-translate-y-0.5 cursor-pointer ${
+              isDark
+                ? 'border-[#3C384D] bg-[#171622] hover:border-[#D9A73A] hover:bg-[#232030]'
+                : 'border-[#E5D7C3] bg-white hover:border-[#D9B562] hover:bg-[#FFFDF9]'
+            }`}
+          >
+            <span className="text-3xl group-hover:scale-110 transition-transform">🇮🇳</span>
+            <div className="text-center">
+              <span className={`block text-base font-bold font-sans ${isDark ? 'text-[#FAF6EE]' : 'text-[#2A170E]'}`}>
+                தமிழ்
+              </span>
+              <span className={`text-[10px] font-medium ${isDark ? 'text-[#A7A2B8]' : 'text-[#8A7160]'}`}>
+                தமிழில் தொடரவும்
+              </span>
+            </div>
+            <span className="text-[11px] font-bold text-[#D9A73A] mt-1 group-hover:underline">
+              தேர்வு செய் →
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ═══════════════════════════════════════════════
    OVERVIEW TAB (Beige & Gold / Midnight & Gold)
 ═══════════════════════════════════════════════ */
 const OverviewSection: React.FC<{
   studio: BusinessSettings;
   services: ServiceItem[];
   isDark: boolean;
+  lang: Lang;
+  t: (key: import('../i18n/translations').TranslationKey) => string;
   onSelectCourses: () => void;
   onSelectServices: () => void;
-}> = ({ studio, services, isDark, onSelectCourses, onSelectServices }) => {
+  onOpenStageSyllabus?: (stageId: 'beginner' | 'intermediate' | 'advanced') => void;
+}> = ({ studio, services, isDark, lang, t, onSelectCourses, onSelectServices, onOpenStageSyllabus }) => {
   const features = [
-    { icon: Users, label: 'Personalised Guidance', desc: '1-on-1 attention for every student' },
-    { icon: BookOpen, label: 'Industry-Ready Syllabus', desc: 'Practical modern syllabus' },
-    { icon: Zap, label: '100% Practical Training', desc: 'Real stitching on live garments' },
-    { icon: Award, label: 'Expert Mentorship', desc: 'Master boutique techniques' },
+    { icon: Users, label: t('feature1Label'), desc: t('feature1Desc') },
+    { icon: BookOpen, label: t('feature2Label'), desc: t('feature2Desc') },
+    { icon: Zap, label: t('feature3Label'), desc: t('feature3Desc') },
+    { icon: Award, label: t('feature4Label'), desc: t('feature4Desc') },
   ];
 
-  const levels = [
+  const levels: {
+    id: 'beginner' | 'intermediate' | 'advanced';
+    name: string;
+    desc: string;
+    badge: string;
+    bg: string;
+  }[] = [
     {
-      name: 'Beginner Level',
-      desc: 'Machine basics, fundamental stitching & hand tools',
-      badge: 'Foundations',
+      id: 'beginner',
+      name: t('beginnerName'),
+      desc: t('beginnerDesc'),
+      badge: t('beginnerBadge'),
       bg: isDark
         ? 'bg-emerald-950/20 border-emerald-800/40 text-emerald-200'
         : 'bg-emerald-50/90 border-emerald-300/80 text-emerald-950',
     },
     {
-      name: 'Intermediate Level',
-      desc: 'Pattern drafting, women’s wear creation & fitting',
-      badge: 'Core Skills',
+      id: 'intermediate',
+      name: t('intermediateName'),
+      desc: t('intermediateDesc'),
+      badge: t('intermediateBadge'),
       bg: isDark
         ? 'bg-amber-950/20 border-amber-800/40 text-amber-200'
         : 'bg-amber-50/90 border-amber-300/80 text-amber-950',
     },
     {
-      name: 'Advanced Level',
-      desc: 'Designer garments, bridal stitching & boutique mastery',
-      badge: 'Couture Mastery',
+      id: 'advanced',
+      name: t('advancedName'),
+      desc: t('advancedDesc'),
+      badge: t('advancedBadge'),
       bg: isDark
         ? 'bg-rose-950/20 border-rose-800/40 text-rose-200'
         : 'bg-rose-50/90 border-rose-300/80 text-rose-950',
@@ -198,7 +315,7 @@ const OverviewSection: React.FC<{
           }`}
         >
           <Award className={`w-4 h-4 shrink-0 ${isDark ? 'text-[#E8BE56]' : 'text-[#B8861B]'}`} />
-          <span>ISEIT India Federation · Govt. Regd. &amp; ISO Certified</span>
+          <span>{t('accreditBadge')}</span>
         </div>
       </div>
 
@@ -227,40 +344,40 @@ const OverviewSection: React.FC<{
           }`}
         />
 
-        <div className="relative z-10 text-center space-y-4">
+        <div className="relative z-10 text-center space-y-5 sm:space-y-6">
           <div
-            className={`inline-block px-3 py-1 rounded-full border text-[10px] sm:text-xs font-bold uppercase tracking-widest shadow-sm ${
+            className={`inline-block px-3.5 py-1.5 rounded-full border text-xs font-bold uppercase tracking-wider shadow-sm ${
               isDark
                 ? 'bg-gold-500/15 border-gold-400/30 text-gold-300'
                 : 'bg-[#EEDBBF] border-[#D9B562] text-[#634215]'
             }`}
           >
-            {studio.subtitle || 'School of Fashion Design & Tailoring'}
+            {studio.subtitle || t('subtitle')}
           </div>
 
           <h2
-            className={`text-2xl sm:text-4xl md:text-5xl font-serif font-bold tracking-tight leading-tight ${
+            className={`text-2xl sm:text-4xl md:text-5xl font-serif font-bold tracking-normal leading-normal sm:leading-relaxed [word-spacing:0.14em] brand-name ${
               isDark ? 'text-[#FDFCF9]' : 'text-[#26150D]'
             }`}
+            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
           >
-            {studio.business_name || 'Tamil Designer Studio'}
+            Tamil Designer Studio
           </h2>
 
           <p
-            className={`font-serif italic text-base sm:text-xl ${
+            className={`font-serif italic text-base sm:text-xl leading-relaxed sm:leading-loose [word-spacing:0.12em] ${
               isDark ? 'text-[#E8BE56]' : 'text-[#9B7120]'
             }`}
           >
-            {studio.quote || 'Learn · Create · Master'}
+            {studio.quote || t('heroQuote')}
           </p>
 
           <p
-            className={`text-xs sm:text-sm max-w-lg mx-auto leading-relaxed ${
+            className={`text-xs sm:text-sm max-w-xl mx-auto leading-relaxed sm:leading-loose [word-spacing:0.12em] ${
               isDark ? 'text-[#D1CADB]' : 'text-[#5C4535]'
             }`}
           >
-            {studio.tagline ||
-              'Turn your passion for fashion into a profession. We offer certified, hands-on courses for beginners to advanced designers, along with bespoke custom tailoring.'}
+            {studio.tagline || t('heroDesc')}
           </p>
 
           {/* Key Metrics */}
@@ -282,7 +399,7 @@ const OverviewSection: React.FC<{
                   isDark ? 'text-[#A7A2B8]' : 'text-[#6B5344]'
                 }`}
               >
-                Levels
+                {t('metricsLevels')}
               </span>
             </div>
             <div
@@ -302,7 +419,7 @@ const OverviewSection: React.FC<{
                   isDark ? 'text-[#A7A2B8]' : 'text-[#6B5344]'
                 }`}
               >
-                Practical
+                {t('metricsPractical')}
               </span>
             </div>
             <div
@@ -322,7 +439,7 @@ const OverviewSection: React.FC<{
                   isDark ? 'text-[#A7A2B8]' : 'text-[#6B5344]'
                 }`}
               >
-                Certified
+                {t('metricsCertified')}
               </span>
             </div>
           </div>
@@ -336,61 +453,67 @@ const OverviewSection: React.FC<{
               className="inline-flex items-center gap-2 bg-gradient-to-r from-[#D9A73A] via-[#E8BE56] to-[#C9962A] hover:brightness-105 text-[#160E07] text-xs sm:text-sm font-bold px-7 py-3 rounded-2xl transition-all shadow-[0_4px_20px_rgba(217,167,58,0.38)] active:scale-95"
             >
               <MessageCircle className="w-4 h-4 fill-current" />
-              <span>Inquire on WhatsApp</span>
+              <span>{t('inquireWhatsApp')}</span>
             </a>
           </div>
         </div>
       </div>
 
       {/* ── Academy Specialities Highlight ── */}
-      <AcademySpecialities isDark={isDark} />
+      <AcademySpecialities isDark={isDark} lang={lang} />
 
       {/* ── Course Levels Overview ── */}
-      <div className="space-y-3">
+      <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <GraduationCap className={`w-4 h-4 ${isDark ? 'text-[#E8BE56]' : 'text-[#B8861B]'}`} />
+          <div className="flex items-center gap-2.5">
+            <GraduationCap className={`w-4 h-4 shrink-0 ${isDark ? 'text-[#E8BE56]' : 'text-[#B8861B]'}`} />
             <h3
-              className={`text-xs font-bold uppercase tracking-wider ${
+              className={`text-xs sm:text-sm font-bold uppercase tracking-wider [word-spacing:0.1em] ${
                 isDark ? 'text-[#A7A2B8]' : 'text-[#7C6556]'
               }`}
             >
-              Course Curriculum Levels
+              {t('courseLevelsTitle')}
             </h3>
           </div>
           <button
             onClick={onSelectCourses}
-            className={`text-xs font-bold hover:underline flex items-center gap-1 ${
+            className={`text-xs font-bold hover:underline flex items-center gap-1.5 [word-spacing:0.08em] ${
               isDark ? 'text-[#E8BE56]' : 'text-[#8C6010]'
             }`}
           >
-            <span>View All</span>
+            <span>{t('viewAll')}</span>
             <ChevronRight className="w-3.5 h-3.5" />
           </button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {levels.map((lvl) => (
             <div
               key={lvl.name}
-              onClick={onSelectCourses}
-              className={`cursor-pointer rounded-2xl border p-4 transition-all hover:scale-[1.02] hover:shadow-md ${lvl.bg} flex flex-col justify-between`}
+              onClick={() => {
+                if (onOpenStageSyllabus) {
+                  onOpenStageSyllabus(lvl.id);
+                } else {
+                  onSelectCourses();
+                }
+              }}
+              className={`cursor-pointer rounded-2xl border-2 p-5 transition-all hover:scale-[1.02] hover:shadow-lg ${lvl.bg} flex flex-col justify-between space-y-3.5`}
             >
-              <div>
-                <span className="inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-black/10 dark:bg-white/10 mb-2">
+              <div className="space-y-2">
+                <span className="inline-block text-xs font-bold uppercase tracking-wide px-2.5 py-1 rounded-full bg-black/10 dark:bg-white/10 mb-1">
                   {lvl.badge}
                 </span>
-                <h4 className="font-serif font-bold text-sm sm:text-base leading-snug">
+                <h4 className="font-serif font-bold text-base sm:text-lg leading-relaxed tracking-normal [word-spacing:0.14em]">
                   {lvl.name}
                 </h4>
-                <p className="text-xs opacity-80 mt-1 leading-relaxed">{lvl.desc}</p>
+                <p className="text-xs sm:text-[13px] opacity-85 leading-relaxed sm:leading-loose [word-spacing:0.12em]">{lvl.desc}</p>
               </div>
               <span
-                className={`text-[11px] font-bold mt-3 flex items-center gap-1 ${
+                className={`text-xs font-bold pt-1 flex items-center gap-1.5 [word-spacing:0.08em] ${
                   isDark ? 'text-[#E8BE56]' : 'text-[#8C6010]'
                 }`}
               >
-                Explore syllabus <ChevronRight className="w-3 h-3" />
+                {t('seeSyllabusPdf')} <ChevronRight className="w-3.5 h-3.5" />
               </span>
             </div>
           ))}
@@ -417,21 +540,21 @@ const OverviewSection: React.FC<{
                 : 'text-[#7A500C] bg-[#FAF0DC] border-[#DFC99C]'
             }`}
           >
-            Specialized Masterclass
+            {t('sareeBannerBadge')}
           </span>
           <h4
             className={`font-serif font-bold text-sm sm:text-base mt-0.5 ${
               isDark ? 'text-[#FAF6EE]' : 'text-[#2A170E]'
             }`}
           >
-            Saree Prepleting Class
+            {t('sareeBannerTitle')}
           </h4>
           <p
             className={`text-xs mt-0.5 ${
               isDark ? 'text-[#A7A2B8]' : 'text-[#6B5344]'
             }`}
           >
-            Master professional draping, precision box folding, hanger folding &amp; buffy pleats.
+            {t('sareeBannerDesc')}
           </p>
         </div>
         <ChevronRight
@@ -449,7 +572,7 @@ const OverviewSection: React.FC<{
           }`}
         >
           <TrendingUp className={`w-4 h-4 ${isDark ? 'text-[#E8BE56]' : 'text-[#B8861B]'}`} />
-          Why Choose {studio.business_name || 'Tamil Designer Studio'}
+          {t('featuresTitle')} <span className="brand-name" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>Tamil Designer Studio</span>
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {features.map(({ icon: Icon, label, desc }) => (
@@ -506,7 +629,7 @@ const OverviewSection: React.FC<{
               }`}
             >
               <Clock className="w-4 h-4" />
-              Batch &amp; Class Timings
+              {t('timingsTitle')}
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div
@@ -521,14 +644,14 @@ const OverviewSection: React.FC<{
                     isDark ? 'text-[#FAF6EE]' : 'text-[#2A170E]'
                   }`}
                 >
-                  Morning Batch
+                  {t('morningBatch')}
                 </p>
                 <p
                   className={`font-semibold text-xs mt-0.5 ${
                     isDark ? 'text-[#E8BE56]' : 'text-[#8C6010]'
                   }`}
                 >
-                  9:00 AM – 1:00 PM
+                  {t('morningTime')}
                 </p>
               </div>
               <div
@@ -543,14 +666,14 @@ const OverviewSection: React.FC<{
                     isDark ? 'text-[#FAF6EE]' : 'text-[#2A170E]'
                   }`}
                 >
-                  Evening Batch
+                  {t('eveningBatch')}
                 </p>
                 <p
                   className={`font-semibold text-xs mt-0.5 ${
                     isDark ? 'text-[#E8BE56]' : 'text-[#8C6010]'
                   }`}
                 >
-                  3:00 PM – 8:00 PM
+                  {t('eveningTime')}
                 </p>
               </div>
             </div>
@@ -560,7 +683,7 @@ const OverviewSection: React.FC<{
               isDark ? 'text-[#8E899E]' : 'text-[#7C6556]'
             }`}
           >
-            {studio.timings_weekdays || 'Monday to Friday · Regular & Weekend batches available'}
+            {studio.timings_weekdays || t('timingsNote')}
           </p>
         </div>
 
@@ -578,7 +701,7 @@ const OverviewSection: React.FC<{
                 }`}
               >
                 <MapPin className="w-4 h-4 text-[#D9A73A]" />
-                Studio Location &amp; Address
+                {t('locationTitle')}
               </div>
               <span
                 className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${
@@ -587,7 +710,7 @@ const OverviewSection: React.FC<{
                     : 'bg-[#FAF0DC] border-[#DFC99C] text-[#7A500C]'
                 }`}
               >
-                Coimbatore
+                {t('locationCity')}
               </span>
             </div>
 
@@ -600,18 +723,19 @@ const OverviewSection: React.FC<{
             >
               <div className="flex items-center gap-2">
                 <span
-                  className={`font-serif font-bold text-sm sm:text-base ${
+                  className={`font-serif font-bold text-sm sm:text-base brand-name ${
                     isDark ? 'text-[#FAF6EE]' : 'text-[#2A170E]'
                   }`}
+                  style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
                 >
-                  {studio.business_name || 'Tamil Designer Studio'}
+                  Tamil Designer Studio
                 </span>
                 <span
                   className={`text-[10px] font-semibold px-2 py-0.5 rounded-md ${
                     isDark ? 'bg-[#D9A73A]/20 text-[#E8BE56]' : 'bg-[#D9A73A]/15 text-[#8C6010]'
                   }`}
                 >
-                  Visit Studio
+                  {t('visitStudio')}
                 </span>
               </div>
               <p
@@ -619,8 +743,7 @@ const OverviewSection: React.FC<{
                   isDark ? 'text-[#D1CADB]' : 'text-[#4A392D]'
                 }`}
               >
-                1/208 C, Jeeva street, Chinniyampalayam,<br />
-                Coimbatore - 641062
+                {t('locationAddress')}
               </p>
             </div>
           </div>
@@ -633,7 +756,7 @@ const OverviewSection: React.FC<{
               className="flex-1 inline-flex items-center justify-center gap-2 bg-gradient-to-r from-[#D9A73A] via-[#E8BE56] to-[#C9962A] hover:brightness-105 text-[#160E07] text-xs font-bold py-2.5 px-3 rounded-xl transition-all shadow-sm active:scale-95"
             >
               <MapPin className="w-3.5 h-3.5 fill-current" />
-              <span>Get Directions</span>
+              <span>{t('getDirections')}</span>
             </a>
             <a
               href={`tel:+${studio.phone_raw}`}
@@ -644,7 +767,7 @@ const OverviewSection: React.FC<{
               }`}
             >
               <Phone className="w-3.5 h-3.5" />
-              <span>Call</span>
+              <span>{t('call')}</span>
             </a>
           </div>
         </div>
@@ -660,7 +783,7 @@ const OverviewSection: React.FC<{
                 isDark ? 'text-[#A7A2B8]' : 'text-[#7C6556]'
               }`}
             >
-              Stitching Services
+              {t('stitchingServices')}
             </h3>
           </div>
           <button
@@ -669,7 +792,7 @@ const OverviewSection: React.FC<{
               isDark ? 'text-[#E8BE56]' : 'text-[#8C6010]'
             }`}
           >
-            <span>View All ({services.length})</span>
+            <span>{t('viewAllServices')} ({services.length})</span>
             <ChevronRight className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -708,7 +831,7 @@ const OverviewSection: React.FC<{
                     isDark ? 'text-[#FAF6EE]' : 'text-[#2A170E]'
                   }`}
                 >
-                  {service.title}
+                  {(lang === 'ta' && service.title_ta) ? service.title_ta : service.title}
                 </p>
                 {service.description && (
                   <p
@@ -716,7 +839,7 @@ const OverviewSection: React.FC<{
                       isDark ? 'text-[#8E899E]' : 'text-[#7C6556]'
                     }`}
                   >
-                    {service.description}
+                    {(lang === 'ta' && service.description_ta) ? service.description_ta : service.description}
                   </p>
                 )}
               </div>
@@ -732,33 +855,37 @@ const OverviewSection: React.FC<{
 /* ═══════════════════════════════════════════════
    BOTTOM ACTION BAR (Minimal & Touch-Optimized)
 ═══════════════════════════════════════════════ */
-const BottomBar: React.FC<{ studio: BusinessSettings; isDark: boolean }> = ({ studio, isDark }) => {
+const BottomBar: React.FC<{
+  studio: BusinessSettings;
+  isDark: boolean;
+  t: (key: import('../i18n/translations').TranslationKey) => string;
+}> = ({ studio, isDark, t }) => {
   const actions = [
     {
       href: studio.whatsapp_url,
       icon: MessageCircle,
-      label: 'WhatsApp',
+      label: t('bottomWhatsApp'),
       color: isDark ? 'text-emerald-400' : 'text-emerald-700',
       activeBg: isDark ? 'hover:bg-emerald-950/40' : 'hover:bg-emerald-50',
     },
     {
       href: `tel:+${studio.phone_raw}`,
       icon: Phone,
-      label: 'Call',
+      label: t('bottomCall'),
       color: isDark ? 'text-[#FAF6EE]' : 'text-[#2A170E]',
       activeBg: isDark ? 'hover:bg-[#252233]' : 'hover:bg-[#FAF5EB]',
     },
     {
       href: studio.instagram_url,
       icon: InstagramIcon,
-      label: 'Instagram',
+      label: t('bottomInstagram'),
       color: isDark ? 'text-rose-400' : 'text-rose-700',
       activeBg: isDark ? 'hover:bg-rose-950/40' : 'hover:bg-rose-50',
     },
     {
       href: studio.maps_url,
       icon: MapPin,
-      label: 'Directions',
+      label: t('bottomDirections'),
       color: isDark ? 'text-amber-400' : 'text-amber-700',
       activeBg: isDark ? 'hover:bg-amber-950/40' : 'hover:bg-amber-50',
     },
@@ -780,12 +907,12 @@ const BottomBar: React.FC<{ studio: BusinessSettings; isDark: boolean }> = ({ st
             className={`flex flex-col items-center justify-center gap-1 py-1.5 rounded-xl transition-all active:scale-95 ${color} ${activeBg}`}
           >
             <Icon className="w-5 h-5 shrink-0" />
-            <span className="text-[10px] font-bold tracking-tight">{label}</span>
+            <span className="text-[11px] font-bold tracking-normal sm:tracking-wide [word-spacing:0.08em]">{label}</span>
           </a>
         ))}
       </div>
       <div
-        className={`text-center text-[9px] pb-2 px-4 truncate ${
+        className={`text-center text-[10px] pb-2 px-4 truncate [word-spacing:0.08em] ${
           isDark ? 'text-[#8E899E]' : 'text-[#8A7160]'
         }`}
       >
@@ -799,6 +926,23 @@ const BottomBar: React.FC<{ studio: BusinessSettings; isDark: boolean }> = ({ st
    MAIN PUBLIC STUDIO PAGE
 ═══════════════════════════════════════════════ */
 export const PublicStudioPage: React.FC = () => {
+  // ── Language ──────────────────────────────────────────────────────────────
+  const { lang, setLang, toggleLang, t } = useLanguage();
+  // Show language picker on first visit (when no preference stored)
+  const [showLangPicker, setShowLangPicker] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('tds_language_preference') === null;
+    } catch {
+      return false;
+    }
+  });
+
+  const handleLangPick = useCallback((picked: Lang) => {
+    setLang(picked);
+    setShowLangPicker(false);
+  }, [setLang]);
+
+  // ── Theme ─────────────────────────────────────────────────────────────────
   const [isDark, setIsDark] = useState<boolean>(() => {
     try {
       return localStorage.getItem('tds_theme') === 'dark';
@@ -839,19 +983,25 @@ export const PublicStudioPage: React.FC = () => {
   const [settings, setSettings] = useState<BusinessSettings | null>(null);
   const [services, setServices] = useState<ServiceItem[]>([]);
   const [courses, setCourses] = useState<CourseItem[]>([]);
+  const [stageSyllabuses, setStageSyllabuses] = useState<CourseStageSyllabus[]>(DEFAULT_STAGE_SYLLABUSES);
+  const [selectedSyllabusStage, setSelectedSyllabusStage] = useState<CourseStageSyllabus | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'overview' | 'services' | 'courses'>('overview');
 
   useEffect(() => {
     async function loadData() {
       try {
-        const [loadedSettings, loadedServices, loadedCourses] = await Promise.all([
+        const [loadedSettings, loadedServices, loadedCourses, loadedStages] = await Promise.all([
           db.getBusinessSettings(),
           db.getServices(true),
           db.getCourses(true),
+          db.getStageSyllabuses(),
         ]);
         setSettings(loadedSettings);
         setServices(loadedServices);
+        if (loadedStages && loadedStages.length > 0) {
+          setStageSyllabuses(loadedStages);
+        }
         // Exclude Boutique Business Training per user request
         setCourses(
           loadedCourses.filter(
@@ -885,6 +1035,12 @@ export const PublicStudioPage: React.FC = () => {
         );
       }
     };
+    const handleStagesUpdate = (e: Event) => {
+      const customEvent = e as CustomEvent<CourseStageSyllabus[]>;
+      if (customEvent.detail) {
+        setStageSyllabuses(customEvent.detail);
+      }
+    };
 
     // Cross-tab storage change listener
     const handleStorageChange = (e: StorageEvent) => {
@@ -909,20 +1065,30 @@ export const PublicStudioPage: React.FC = () => {
           );
         } catch {}
       }
+      if (e.key === 'tds_stage_syllabuses' && e.newValue) {
+        db.getStageSyllabuses().then((stages) => setStageSyllabuses(stages)).catch(() => {});
+      }
     };
 
     window.addEventListener('tds_settings_updated', handleSettingsUpdate);
     window.addEventListener('tds_services_updated', handleServicesUpdate);
     window.addEventListener('tds_courses_updated', handleCoursesUpdate);
+    window.addEventListener('tds_stage_syllabuses_updated', handleStagesUpdate);
     window.addEventListener('storage', handleStorageChange);
 
     return () => {
       window.removeEventListener('tds_settings_updated', handleSettingsUpdate);
       window.removeEventListener('tds_services_updated', handleServicesUpdate);
       window.removeEventListener('tds_courses_updated', handleCoursesUpdate);
+      window.removeEventListener('tds_stage_syllabuses_updated', handleStagesUpdate);
       window.removeEventListener('storage', handleStorageChange);
     };
   }, []);
+
+  // Show language picker on very first open (before splash)
+  if (showLangPicker) {
+    return <LanguagePicker isDark={isDark} onPick={handleLangPick} />;
+  }
 
   if (loading || showSplash) {
     return <SplashScreen onDone={() => setShowSplash(false)} isDark={isDark} studio={settings} />;
@@ -931,9 +1097,9 @@ export const PublicStudioPage: React.FC = () => {
   const studio = settings!;
 
   const tabs: { key: 'overview' | 'services' | 'courses'; label: string }[] = [
-    { key: 'overview', label: 'Overview' },
-    { key: 'services', label: `Stitching Services (${services.length})` },
-    { key: 'courses', label: `Courses (${courses.length})` },
+    { key: 'overview', label: t('tabOverview') },
+    { key: 'services', label: `${t('tabServices')} (${services.length})` },
+    { key: 'courses', label: `${t('tabCourses')} (${courses.length})` },
   ];
 
   return (
@@ -967,40 +1133,62 @@ export const PublicStudioPage: React.FC = () => {
             </div>
             <div className="flex flex-col leading-tight">
               <span
-                className={`text-sm sm:text-base font-serif font-bold tracking-tight ${
+                className={`text-sm sm:text-base font-serif font-bold tracking-normal brand-name ${
                   isDark ? 'text-[#FAF6EE]' : 'text-[#2A170E]'
                 }`}
+                style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
               >
-                {studio.business_name || 'Tamil Designer Studio'}
+                Tamil Designer Studio
               </span>
               <span
                 className={`text-[10px] font-semibold uppercase tracking-wider hidden sm:block ${
                   isDark ? 'text-[#E8BE56]' : 'text-[#8C6010]'
                 }`}
               >
-                {studio.subtitle || 'School of Fashion Design & Tailoring'}
+                {studio.subtitle || t('subtitle')}
               </span>
             </div>
           </div>
 
-          {/* Theme Toggle Button (Light / Dark) */}
-          <button
-            onClick={toggleTheme}
-            type="button"
-            title={isDark ? 'Switch to Light Mode (Beige & Gold)' : 'Switch to Dark Mode (Midnight & Gold)'}
-            aria-label="Toggle Theme"
-            className={`w-10 h-10 rounded-xl flex items-center justify-center border transition-all active:scale-95 shadow-sm ${
-              isDark
-                ? 'bg-[#222030] border-[#3C384D] text-[#E8BE56] hover:border-[#D9A73A]'
-                : 'bg-gradient-to-br from-[#FAF5EB] to-[#F3E7D3] border-[#D9B562] text-[#5C3F18] hover:border-[#B8861B]'
-            }`}
-          >
-            {isDark ? (
-              <Sun className="w-5 h-5 text-[#E8BE56] animate-spin-slow" />
-            ) : (
-              <Moon className="w-5 h-5 text-[#5C3F18]" />
-            )}
-          </button>
+          {/* Right: Language Toggle + Theme Toggle */}
+          <div className="flex items-center gap-2">
+            {/* Language Toggle Button (Shows opposite target language, like Dark/Light theme) */}
+            <button
+              onClick={toggleLang}
+              type="button"
+              title={lang === 'en' ? 'தமிழுக்கு மாற்றவும் (Switch to Tamil)' : 'Switch to English'}
+              aria-label={lang === 'en' ? 'Switch to Tamil' : 'Switch to English'}
+              className={`h-10 px-3.5 rounded-xl flex items-center gap-1.5 border transition-all active:scale-95 shadow-sm text-xs font-bold ${
+                isDark
+                  ? 'bg-[#222030] border-[#3C384D] text-[#E8BE56] hover:border-[#D9A73A]'
+                  : 'bg-gradient-to-br from-[#FAF5EB] to-[#F3E7D3] border-[#D9B562] text-[#5C3F18] hover:border-[#B8861B]'
+              }`}
+            >
+              <Languages className="w-3.5 h-3.5 shrink-0 text-[#D9A73A]" />
+              <span className="tracking-wide">
+                {lang === 'en' ? 'தமிழ்' : 'English'}
+              </span>
+            </button>
+
+            {/* Theme Toggle Button (Light / Dark) */}
+            <button
+              onClick={toggleTheme}
+              type="button"
+              title={isDark ? 'Switch to Light Mode (Beige & Gold)' : 'Switch to Dark Mode (Midnight & Gold)'}
+              aria-label="Toggle Theme"
+              className={`w-10 h-10 rounded-xl flex items-center justify-center border transition-all active:scale-95 shadow-sm ${
+                isDark
+                  ? 'bg-[#222030] border-[#3C384D] text-[#E8BE56] hover:border-[#D9A73A]'
+                  : 'bg-gradient-to-br from-[#FAF5EB] to-[#F3E7D3] border-[#D9B562] text-[#5C3F18] hover:border-[#B8861B]'
+              }`}
+            >
+              {isDark ? (
+                <Sun className="w-5 h-5 text-[#E8BE56] animate-spin-slow" />
+              ) : (
+                <Moon className="w-5 h-5 text-[#5C3F18]" />
+              )}
+            </button>
+          </div>
         </div>
       </header>
 
@@ -1016,7 +1204,7 @@ export const PublicStudioPage: React.FC = () => {
               <button
                 key={key}
                 onClick={() => setActiveTab(key)}
-                className={`flex-1 flex items-center justify-center py-3.5 text-xs sm:text-sm font-bold tracking-wide transition-all border-b-2 relative ${
+                className={`flex-1 flex items-center justify-center py-4 px-3 text-xs sm:text-sm font-bold tracking-normal sm:tracking-wide transition-all border-b-2 relative [word-spacing:0.12em] leading-relaxed ${
                   activeTab === key
                     ? isDark
                       ? 'border-[#D9A73A] text-[#FAF6EE]'
@@ -1037,7 +1225,7 @@ export const PublicStudioPage: React.FC = () => {
       </div>
 
       {/* ── Main Content Container ── */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-8 py-8 space-y-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-8 py-8 space-y-10">
 
         {/* 1. OVERVIEW TAB */}
         {activeTab === 'overview' && (
@@ -1045,8 +1233,15 @@ export const PublicStudioPage: React.FC = () => {
             studio={studio}
             services={services}
             isDark={isDark}
+            lang={lang}
+            t={t}
             onSelectCourses={() => setActiveTab('courses')}
             onSelectServices={() => setActiveTab('services')}
+            onOpenStageSyllabus={(stageId) => {
+              const found =
+                stageSyllabuses.find((s) => s.id === stageId) || stageSyllabuses[0];
+              setSelectedSyllabusStage(found);
+            }}
           />
         )}
 
@@ -1068,7 +1263,7 @@ export const PublicStudioPage: React.FC = () => {
                     : 'bg-[#EEDBBF] border-[#D9B562] text-[#634215]'
                 }`}
               >
-                Custom Stitching Services
+                {t('servicesTabBadge')}
               </div>
 
               <h3
@@ -1076,7 +1271,7 @@ export const PublicStudioPage: React.FC = () => {
                   isDark ? 'text-[#FAF6EE]' : 'text-[#2A170E]'
                 }`}
               >
-                Stitching Services
+                {t('servicesTabTitle')}
               </h3>
 
               <p
@@ -1084,16 +1279,16 @@ export const PublicStudioPage: React.FC = () => {
                   isDark ? 'text-[#E8BE56]' : 'text-[#9B7120]'
                 }`}
               >
-                Your Design &bull; Our Stitching &bull; Perfect Fit
+                {t('servicesTagline')}
               </p>
 
               {/* 4 Pillars Badges from Poster */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 max-w-xl mx-auto">
                 {[
-                  'Perfect Stitching',
-                  'Trendy Designs',
-                  'Quality Work',
-                  'All Size Fittings',
+                  t('pillarPerfect'),
+                  t('pillarTrendy'),
+                  t('pillarQuality'),
+                  t('pillarSize'),
                 ].map((label) => (
                   <div
                     key={label}
@@ -1112,7 +1307,7 @@ export const PublicStudioPage: React.FC = () => {
             {/* Services Cards Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {services.map((service) => (
-                <ServiceCard key={service.id} service={service} isDark={isDark} />
+                <ServiceCard key={service.id} service={service} isDark={isDark} lang={lang} />
               ))}
             </div>
 
@@ -1129,14 +1324,14 @@ export const PublicStudioPage: React.FC = () => {
                   isDark ? 'text-[#FAF6EE]' : 'text-[#2A170E]'
                 }`}
               >
-                Have a Custom Design or Fabric in Mind?
+                {t('customInquiryTitle')}
               </h4>
               <p
                 className={`text-xs max-w-md mx-auto ${
                   isDark ? 'text-[#A7A2B8]' : 'text-[#6B5344]'
                 }`}
               >
-                Send your reference photos or measurements directly to our master designer on WhatsApp for quick estimates and consultations.
+                {t('customInquiryDesc')}
               </p>
               <div>
                 <a
@@ -1146,7 +1341,7 @@ export const PublicStudioPage: React.FC = () => {
                   className="inline-flex items-center gap-2 bg-gradient-to-r from-[#D9A73A] via-[#E8BE56] to-[#C9962A] text-[#160E07] text-xs font-bold px-6 py-2.5 rounded-xl shadow-md hover:brightness-105 active:scale-95 transition-all"
                 >
                   <MessageCircle className="w-4 h-4 fill-current" />
-                  <span>Discuss Custom Stitching</span>
+                  <span>{t('discussCustom')}</span>
                 </a>
               </div>
             </div>
@@ -1171,7 +1366,7 @@ export const PublicStudioPage: React.FC = () => {
                     : 'bg-[#EEDBBF] border-[#D9B562] text-[#634215]'
                 }`}
               >
-                Academy Courses &amp; Curriculum
+                {t('coursesTabBadge')}
               </div>
 
               <h3
@@ -1179,7 +1374,7 @@ export const PublicStudioPage: React.FC = () => {
                   isDark ? 'text-[#FAF6EE]' : 'text-[#2A170E]'
                 }`}
               >
-                School of Fashion Design &amp; Tailoring
+                {t('coursesTabTitle')}
               </h3>
 
               <p
@@ -1187,16 +1382,16 @@ export const PublicStudioPage: React.FC = () => {
                   isDark ? 'text-[#E8BE56]' : 'text-[#9B7120]'
                 }`}
               >
-                Master Pattern Drafting &bull; Professional Stitching &bull; Certified Training
+                {t('coursesTagline')}
               </p>
 
               {/* 4 Pillars Badges */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 max-w-xl mx-auto">
                 {[
-                  '100% Practical Training',
-                  'Individual Machines',
-                  'Govt. Certification Support',
-                  'Boutique Setup Guidance',
+                  t('pillarPractical'),
+                  t('pillarMachines'),
+                  t('pillarCert'),
+                  t('pillarBoutique'),
                 ].map((label) => (
                   <div
                     key={label}
@@ -1213,7 +1408,15 @@ export const PublicStudioPage: React.FC = () => {
             </div>
 
             {/* Academy Specialities Spotlight */}
-            <AcademySpecialities isDark={isDark} />
+            <AcademySpecialities isDark={isDark} lang={lang} />
+
+            {/* 3 Course Stages Syllabus Boxes (Beginner, Intermediate, Advanced) */}
+            <CourseStagesSyllabusSection
+              stages={stageSyllabuses}
+              isDark={isDark}
+              lang={lang}
+              onOpenSyllabus={(stage) => setSelectedSyllabusStage(stage)}
+            />
 
             {/* Courses Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -1223,6 +1426,7 @@ export const PublicStudioPage: React.FC = () => {
                   course={course}
                   whatsappUrl={studio.whatsapp_url}
                   isDark={isDark}
+                  lang={lang}
                 />
               ))}
             </div>
@@ -1240,14 +1444,14 @@ export const PublicStudioPage: React.FC = () => {
                   isDark ? 'text-[#FAF6EE]' : 'text-[#2A170E]'
                 }`}
               >
-                Want to Enroll or Inquire About Next Batch Timings?
+                {t('enrollTitle')}
               </h4>
               <p
                 className={`text-xs max-w-md mx-auto ${
                   isDark ? 'text-[#A7A2B8]' : 'text-[#6B5344]'
                 }`}
               >
-                Connect directly with our master instructor on WhatsApp to get the complete syllabus booklet, fees details, and seat availability.
+                {t('enrollDesc')}
               </p>
               <div>
                 <a
@@ -1257,7 +1461,7 @@ export const PublicStudioPage: React.FC = () => {
                   className="inline-flex items-center gap-2 bg-gradient-to-r from-[#D9A73A] via-[#E8BE56] to-[#C9962A] text-[#160E07] text-xs font-bold px-6 py-2.5 rounded-xl shadow-md hover:brightness-105 active:scale-95 transition-all"
                 >
                   <MessageCircle className="w-4 h-4 fill-current" />
-                  <span>Inquire for Admission &amp; Syllabus</span>
+                  <span>{t('inquireAdmission')}</span>
                 </a>
               </div>
             </div>
@@ -1286,7 +1490,7 @@ export const PublicStudioPage: React.FC = () => {
               isDark ? 'text-[#8E899E]' : 'text-[#8A7160]'
             }`}
           >
-            © {new Date().getFullYear()} {studio.business_name}. All rights reserved.
+            © {new Date().getFullYear()} {studio.business_name}. {t('allRightsReserved')}
           </div>
           <a
             href="/admin"
@@ -1296,13 +1500,24 @@ export const PublicStudioPage: React.FC = () => {
                 : 'text-[#8A7160] hover:text-[#B8861B]'
             }`}
           >
-            Admin Dashboard
+            {t('adminDashboard')}
           </a>
         </footer>
       </main>
 
       {/* ── Fixed Bottom Contact Bar ── */}
-      <BottomBar studio={studio} isDark={isDark} />
+      <BottomBar studio={studio} isDark={isDark} t={t} />
+
+      {/* ── Syllabus PDF Viewer & Download Modal ── */}
+      {selectedSyllabusStage && (
+        <SyllabusPdfModal
+          stage={selectedSyllabusStage}
+          whatsappUrl={studio.whatsapp_url}
+          isDark={isDark}
+          lang={lang}
+          onClose={() => setSelectedSyllabusStage(null)}
+        />
+      )}
 
     </div>
   );

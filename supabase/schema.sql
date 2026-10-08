@@ -22,50 +22,66 @@ CREATE TABLE IF NOT EXISTS public.qr_codes (
 
 -- ── 2. BUSINESS SETTINGS ─────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS public.business_settings (
-    id               UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    business_name    VARCHAR(255) NOT NULL DEFAULT 'Tamil Designer Studio',
-    subtitle         VARCHAR(255) NOT NULL DEFAULT 'School of Fashion Design & Tailoring',
-    tagline          VARCHAR(255) NOT NULL DEFAULT 'Wear Dreams, Not Just Clothes.',
-    quote            VARCHAR(255) NOT NULL DEFAULT 'Where Fabric Meets Imagination',
-    phone            VARCHAR(50)  NOT NULL DEFAULT '78452 64168',
-    phone_raw        VARCHAR(50)  NOT NULL DEFAULT '917845264168',
-    whatsapp_url     TEXT NOT NULL DEFAULT 'https://wa.me/917845264168',
-    instagram_url    TEXT NOT NULL DEFAULT 'https://instagram.com/tamil_designer_studio',
-    maps_url         TEXT NOT NULL DEFAULT '',
-    website_url      TEXT DEFAULT '',
-    address_line1    VARCHAR(255) NOT NULL DEFAULT '1/208 C, Jeeva Street',
-    address_line2    VARCHAR(255) NOT NULL DEFAULT 'Chinniyampalayam',
-    address_city     VARCHAR(100) NOT NULL DEFAULT 'Coimbatore',
-    address_pincode  VARCHAR(20)  NOT NULL DEFAULT '641062',
-    timings_weekdays VARCHAR(255) NOT NULL DEFAULT 'Weekdays: 9:00 AM - 1:00 PM & 3:00 PM - 8:00 PM',
-    updated_at       TIMESTAMPTZ DEFAULT NOW()
+    id                  UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    business_name       VARCHAR(255) NOT NULL DEFAULT 'Tamil Designer Studio',
+    business_name_ta    VARCHAR(255) DEFAULT 'Tamil Designer Studio',
+    subtitle            VARCHAR(255) NOT NULL DEFAULT 'School of Fashion Design & Tailoring',
+    subtitle_ta         VARCHAR(255) DEFAULT 'ஃபேஷன் டிசைன் & தையல் பள்ளி',
+    tagline             VARCHAR(255) NOT NULL DEFAULT 'Wear Dreams, Not Just Clothes.',
+    tagline_ta          VARCHAR(255) DEFAULT 'கனவுகளை அணியுங்கள், வெறும் ஆடைகளை அல்ல.',
+    quote               VARCHAR(255) NOT NULL DEFAULT 'Where Fabric Meets Imagination',
+    quote_ta            VARCHAR(255) DEFAULT 'துணி கற்பனையுடன் சந்திக்கும் இடம்',
+    phone               VARCHAR(50)  NOT NULL DEFAULT '78452 64168',
+    phone_raw           VARCHAR(50)  NOT NULL DEFAULT '917845264168',
+    whatsapp_url        TEXT NOT NULL DEFAULT 'https://wa.me/917845264168',
+    instagram_url       TEXT NOT NULL DEFAULT 'https://instagram.com/tamil_designer_studio',
+    maps_url            TEXT NOT NULL DEFAULT '',
+    website_url         TEXT DEFAULT '',
+    address_line1       VARCHAR(255) NOT NULL DEFAULT '1/208 C, Jeeva Street',
+    address_line1_ta    VARCHAR(255) DEFAULT '1/208 C, ஜீவா தெரு',
+    address_line2       VARCHAR(255) NOT NULL DEFAULT 'Chinniyampalayam',
+    address_line2_ta    VARCHAR(255) DEFAULT 'சின்னியம்பாளையம்',
+    address_city        VARCHAR(100) NOT NULL DEFAULT 'Coimbatore',
+    address_city_ta     VARCHAR(100) DEFAULT 'கோயம்புத்தூர்',
+    address_pincode     VARCHAR(20)  NOT NULL DEFAULT '641062',
+    timings_weekdays    VARCHAR(255) NOT NULL DEFAULT 'Weekdays: 9:00 AM - 1:00 PM & 3:00 PM - 8:00 PM',
+    timings_weekdays_ta VARCHAR(255) DEFAULT 'திங்கள் - சனி: காலை 9:00 - மதியம் 1:00 & மாலை 3:00 - இரவு 8:00',
+    updated_at          TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- ── 3. SERVICES ──────────────────────────────────────────────────────────────
 -- id is VARCHAR so admin can use s1, s2 ... s99 as stable keys for upsert
 CREATE TABLE IF NOT EXISTS public.services (
-    id          VARCHAR(255) PRIMARY KEY,
-    title       VARCHAR(255) NOT NULL,
-    description TEXT,
-    icon_name   VARCHAR(100) DEFAULT 'Sparkles',
-    image_url   TEXT,
-    items       JSONB DEFAULT '[]'::jsonb,
-    is_active   BOOLEAN DEFAULT TRUE,
-    sort_order  INT DEFAULT 0,
-    created_at  TIMESTAMPTZ DEFAULT NOW()
+    id             VARCHAR(255) PRIMARY KEY,
+    title          VARCHAR(255) NOT NULL,
+    title_ta       VARCHAR(255),
+    description    TEXT,
+    description_ta TEXT,
+    icon_name      VARCHAR(100) DEFAULT 'Sparkles',
+    image_url      TEXT,
+    items          JSONB DEFAULT '[]'::jsonb,
+    items_ta       JSONB DEFAULT '[]'::jsonb,
+    is_active      BOOLEAN DEFAULT TRUE,
+    sort_order     INT DEFAULT 0,
+    created_at     TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- ── 4. COURSES ───────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS public.courses (
-    id          VARCHAR(255) PRIMARY KEY,
-    title       VARCHAR(255) NOT NULL,
-    level       VARCHAR(100) NOT NULL DEFAULT 'Beginner',
-    badge       VARCHAR(100),
-    description TEXT,
-    topics      JSONB NOT NULL DEFAULT '[]'::jsonb,
-    is_active   BOOLEAN DEFAULT TRUE,
-    sort_order  INT DEFAULT 0,
-    created_at  TIMESTAMPTZ DEFAULT NOW()
+    id             VARCHAR(255) PRIMARY KEY,
+    title          VARCHAR(255) NOT NULL,
+    title_ta       VARCHAR(255),
+    level          VARCHAR(100) NOT NULL DEFAULT 'Beginner',
+    level_ta       VARCHAR(100),
+    badge          VARCHAR(100),
+    badge_ta       VARCHAR(100),
+    description    TEXT,
+    description_ta TEXT,
+    topics         JSONB NOT NULL DEFAULT '[]'::jsonb,
+    topics_ta      JSONB DEFAULT '[]'::jsonb,
+    is_active      BOOLEAN DEFAULT TRUE,
+    sort_order     INT DEFAULT 0,
+    created_at     TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- ── 5. SCAN LOGS ─────────────────────────────────────────────────────────────
@@ -125,8 +141,8 @@ VALUES (
     'studio-images',
     'studio-images',
     TRUE,
-    10485760,
-    ARRAY['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+    26214400,
+    ARRAY['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'application/pdf']
 )
 ON CONFLICT (id) DO UPDATE SET
     public = EXCLUDED.public,

@@ -13,6 +13,7 @@ import {
 import { InstagramIcon } from '../../components/icons/InstagramIcon';
 import { BusinessSettings } from '../../types';
 import { db } from '../../services/db';
+import { Lang } from '../../i18n/translations';
 
 const getErrorMessage = (error: unknown, fallback: string) => {
   if (error instanceof Error) return error.message;
@@ -23,7 +24,15 @@ const getErrorMessage = (error: unknown, fallback: string) => {
   return fallback;
 };
 
-export const AdminBusinessProfile: React.FC = () => {
+interface AdminBusinessProfileProps {
+  editLang?: Lang;
+  onLangChange?: (lang: Lang) => void;
+}
+
+export const AdminBusinessProfile: React.FC<AdminBusinessProfileProps> = ({
+  editLang = 'en',
+  onLangChange,
+}) => {
   const [settings, setSettings] = useState<BusinessSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -31,6 +40,8 @@ export const AdminBusinessProfile: React.FC = () => {
   const [saveError, setSaveError] = useState('');
   const [loadError, setLoadError] = useState('');
   const [pendingSettings, setPendingSettings] = useState<BusinessSettings | null>(null);
+
+  const isTa = editLang === 'ta';
 
   useEffect(() => {
     async function fetchSettings() {
@@ -150,53 +161,57 @@ export const AdminBusinessProfile: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1">
               <label className="block text-xs font-semibold uppercase tracking-wider text-studio-700">
-                Business Name
+                {isTa ? 'வணிகப் பெயர் (Business Name - Tamil)' : 'Business Name'}
               </label>
               <input
                 type="text"
-                value={settings.business_name}
-                onChange={(e) => handleChange('business_name', e.target.value)}
+                value={isTa ? (settings.business_name_ta ?? '') : settings.business_name}
+                onChange={(e) => handleChange(isTa ? 'business_name_ta' : 'business_name', e.target.value)}
+                placeholder={isTa ? (settings.business_name || 'தமிழ் டிசைனர் ஸ்டூடியோ') : 'Tamil Designer Studio'}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-beige-300 text-sm focus:outline-none focus:ring-2 focus:ring-gold-400"
-                required
+                required={!isTa}
               />
             </div>
 
             <div className="space-y-1">
               <label className="block text-xs font-semibold uppercase tracking-wider text-studio-700">
-                Subtitle
+                {isTa ? 'துணைத் தலைப்பு (Subtitle - Tamil)' : 'Subtitle'}
               </label>
               <input
                 type="text"
-                value={settings.subtitle}
-                onChange={(e) => handleChange('subtitle', e.target.value)}
+                value={isTa ? (settings.subtitle_ta ?? '') : settings.subtitle}
+                onChange={(e) => handleChange(isTa ? 'subtitle_ta' : 'subtitle', e.target.value)}
+                placeholder={isTa ? (settings.subtitle || 'ஃபேஷன் டிசைன் & தையல் பள்ளி') : 'School of Fashion Design & Tailoring'}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-beige-300 text-sm focus:outline-none focus:ring-2 focus:ring-gold-400"
-                required
+                required={!isTa}
               />
             </div>
 
             <div className="space-y-1">
               <label className="block text-xs font-semibold uppercase tracking-wider text-studio-700">
-                Tagline
+                {isTa ? 'டேக்லைன் (Tagline - Tamil)' : 'Tagline'}
               </label>
               <input
                 type="text"
-                value={settings.tagline}
-                onChange={(e) => handleChange('tagline', e.target.value)}
+                value={isTa ? (settings.tagline_ta ?? '') : settings.tagline}
+                onChange={(e) => handleChange(isTa ? 'tagline_ta' : 'tagline', e.target.value)}
+                placeholder={isTa ? (settings.tagline || 'கனவுகளை அணியுங்கள், வெறும் ஆடைகளை அல்ல.') : 'Wear Dreams, Not Just Clothes.'}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-beige-300 text-sm focus:outline-none focus:ring-2 focus:ring-gold-400"
-                required
+                required={!isTa}
               />
             </div>
 
             <div className="space-y-1">
               <label className="block text-xs font-semibold uppercase tracking-wider text-studio-700">
-                Studio Quote
+                {isTa ? 'மேற்கோள் (Studio Quote - Tamil)' : 'Studio Quote'}
               </label>
               <input
                 type="text"
-                value={settings.quote}
-                onChange={(e) => handleChange('quote', e.target.value)}
+                value={isTa ? (settings.quote_ta ?? '') : settings.quote}
+                onChange={(e) => handleChange(isTa ? 'quote_ta' : 'quote', e.target.value)}
+                placeholder={isTa ? (settings.quote || 'துணி கற்பனையுடன் சந்திக்கும் இடம்') : 'Where Fabric Meets Imagination'}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-beige-300 text-sm focus:outline-none focus:ring-2 focus:ring-gold-400"
-                required
+                required={!isTa}
               />
             </div>
           </div>
@@ -309,43 +324,43 @@ export const AdminBusinessProfile: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1">
               <label className="block text-xs font-semibold uppercase tracking-wider text-studio-700">
-                Address Line 1
+                {isTa ? 'முகவரி வரி 1 (Address Line 1 - Tamil)' : 'Address Line 1'}
               </label>
               <input
                 type="text"
-                value={settings.address_line1}
-                onChange={(e) => handleChange('address_line1', e.target.value)}
-                placeholder="1/208C, Jeeva Street"
+                value={isTa ? (settings.address_line1_ta ?? '') : settings.address_line1}
+                onChange={(e) => handleChange(isTa ? 'address_line1_ta' : 'address_line1', e.target.value)}
+                placeholder={isTa ? (settings.address_line1 || '1/208 C, ஜீவா தெரு') : '1/208C, Jeeva Street'}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-beige-300 text-sm focus:outline-none focus:ring-2 focus:ring-gold-400"
-                required
+                required={!isTa}
               />
             </div>
 
             <div className="space-y-1">
               <label className="block text-xs font-semibold uppercase tracking-wider text-studio-700">
-                Address Line 2 (Area)
+                {isTa ? 'முகவரி வரி 2 (Area - Tamil)' : 'Address Line 2 (Area)'}
               </label>
               <input
                 type="text"
-                value={settings.address_line2}
-                onChange={(e) => handleChange('address_line2', e.target.value)}
-                placeholder="Chinniyampalayam"
+                value={isTa ? (settings.address_line2_ta ?? '') : settings.address_line2}
+                onChange={(e) => handleChange(isTa ? 'address_line2_ta' : 'address_line2', e.target.value)}
+                placeholder={isTa ? (settings.address_line2 || 'சின்னியம்பாளையம்') : 'Chinniyampalayam'}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-beige-300 text-sm focus:outline-none focus:ring-2 focus:ring-gold-400"
-                required
+                required={!isTa}
               />
             </div>
 
             <div className="space-y-1">
               <label className="block text-xs font-semibold uppercase tracking-wider text-studio-700">
-                City
+                {isTa ? 'நகரம் (City - Tamil)' : 'City'}
               </label>
               <input
                 type="text"
-                value={settings.address_city}
-                onChange={(e) => handleChange('address_city', e.target.value)}
-                placeholder="Coimbatore"
+                value={isTa ? (settings.address_city_ta ?? '') : settings.address_city}
+                onChange={(e) => handleChange(isTa ? 'address_city_ta' : 'address_city', e.target.value)}
+                placeholder={isTa ? (settings.address_city || 'கோயம்புத்தூர்') : 'Coimbatore'}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-beige-300 text-sm focus:outline-none focus:ring-2 focus:ring-gold-400"
-                required
+                required={!isTa}
               />
             </div>
 
@@ -365,15 +380,15 @@ export const AdminBusinessProfile: React.FC = () => {
 
             <div className="space-y-1 sm:col-span-2">
               <label className="block text-xs font-semibold uppercase tracking-wider text-studio-700">
-                Class & Studio Timings Description
+                {isTa ? 'வகுப்பு & ஸ்டூடியோ நேரங்கள் (Timings - Tamil)' : 'Class & Studio Timings Description'}
               </label>
               <input
                 type="text"
-                value={settings.timings_weekdays}
-                onChange={(e) => handleChange('timings_weekdays', e.target.value)}
-                placeholder="Weekdays: 9:00 AM – 1:00 PM & 3:00 PM – 8:00 PM"
+                value={isTa ? (settings.timings_weekdays_ta ?? '') : settings.timings_weekdays}
+                onChange={(e) => handleChange(isTa ? 'timings_weekdays_ta' : 'timings_weekdays', e.target.value)}
+                placeholder={isTa ? (settings.timings_weekdays || 'வேலைநாட்கள்: காலை 9:00 – மதியம் 1:00 & மதியம் 3:00 – இரவு 8:00') : 'Weekdays: 9:00 AM – 1:00 PM & 3:00 PM – 8:00 PM'}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-beige-300 text-sm focus:outline-none focus:ring-2 focus:ring-gold-400"
-                required
+                required={!isTa}
               />
             </div>
           </div>

@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { ServiceItem } from '../../types';
 import { db, DEFAULT_SERVICES } from '../../services/db';
+import { Lang } from '../../i18n/translations';
 
 const PRESET_IMAGES = [
   { label: 'Kids Pattu Lehenga', path: '/services/kids_pattu_lehenga.jpg' },
@@ -46,7 +47,15 @@ const getErrorMessage = (error: unknown, fallback: string) => {
   return fallback;
 };
 
-export const AdminServices: React.FC = () => {
+interface AdminServicesProps {
+  editLang?: Lang;
+  onLangChange?: (lang: Lang) => void;
+}
+
+export const AdminServices: React.FC<AdminServicesProps> = ({
+  editLang = 'en',
+  onLangChange,
+}) => {
   const [services, setServices] = useState<ServiceItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -57,6 +66,8 @@ export const AdminServices: React.FC = () => {
   const [uploadingServiceId, setUploadingServiceId] = useState<string | null>(null);
   const [pendingServices, setPendingServices] = useState<ServiceItem[] | null>(null);
   const [newItemInputs, setNewItemInputs] = useState<{ [id: string]: string }>({});
+
+  const isTa = editLang === 'ta';
 
   useEffect(() => {
     async function fetchServices() {
@@ -119,6 +130,10 @@ export const AdminServices: React.FC = () => {
     setServices((prev) =>
       prev.map((s) => {
         if (s.id === serviceId) {
+          if (isTa) {
+            const currentItems = s.items_ta || [...(s.items || [])];
+            return { ...s, items_ta: [...currentItems, text] };
+          }
           const currentItems = s.items || [];
           return { ...s, items: [...currentItems, text] };
         }
@@ -132,6 +147,11 @@ export const AdminServices: React.FC = () => {
     setServices((prev) =>
       prev.map((s) => {
         if (s.id === serviceId) {
+          if (isTa) {
+            const currentItems = [...(s.items_ta || s.items || [])];
+            currentItems.splice(itemIndex, 1);
+            return { ...s, items_ta: currentItems };
+          }
           const currentItems = [...(s.items || [])];
           currentItems.splice(itemIndex, 1);
           return { ...s, items: currentItems };
@@ -288,9 +308,9 @@ export const AdminServices: React.FC = () => {
                   </span>
                   <input
                     type="text"
-                    value={service.title}
-                    onChange={(e) => handleUpdate(service.id, { title: e.target.value })}
-                    placeholder="Category Title"
+                    value={isTa ? (service.title_ta ?? '') : service.title}
+                    onChange={(e) => handleUpdate(service.id, isTa ? { title_ta: e.target.value } : { title: e.target.value })}
+                    placeholder={isTa ? (service.title || 'சேவை வகை தலைப்பு') : 'Category Title'}
                     className="font-serif font-bold text-studio-900 text-base border-b border-transparent hover:border-beige-300 focus:border-gold-500 focus:outline-none bg-transparent flex-1 truncate"
                   />
                 </div>
@@ -344,7 +364,7 @@ export const AdminServices: React.FC = () => {
                     {service.image_url ? (
                       <img
                         src={service.image_url}
-                        alt={service.title}
+                        alt={isTa ? (service.title_ta || service.title) : service.title}
                         className="w-full h-full object-cover object-top"
                         onError={(e) => {
                           (e.target as HTMLElement).style.display = 'none';
@@ -391,13 +411,13 @@ export const AdminServices: React.FC = () => {
               {/* Description */}
               <div>
                 <label className="block text-[11px] font-semibold uppercase tracking-wider text-studio-600 mb-1">
-                  Description
+                  {isTa ? 'விளக்கம் (Description - Tamil)' : 'Description'}
                 </label>
                 <textarea
                   rows={2}
-                  value={service.description}
-                  onChange={(e) => handleUpdate(service.id, { description: e.target.value })}
-                  placeholder="Service description"
+                  value={isTa ? (service.description_ta ?? '') : service.description}
+                  onChange={(e) => handleUpdate(service.id, isTa ? { description_ta: e.target.value } : { description: e.target.value })}
+                  placeholder={isTa ? (service.description || 'சேவை விளக்கம்') : 'Service description'}
                   className="w-full px-3 py-2 rounded-xl border border-beige-300 text-xs focus:outline-none focus:ring-2 focus:ring-gold-400 text-studio-800"
                 />
               </div>
@@ -405,11 +425,13 @@ export const AdminServices: React.FC = () => {
               {/* Included Items Checklist */}
               <div className="space-y-1.5">
                 <label className="block text-[11px] font-semibold uppercase tracking-wider text-studio-600">
-                  Included Variations / Stitched Items ({service.items?.length || 0})
+                  {isTa
+                    ? `சேர்க்கப்பட்டுள்ள வகைகள் (${(isTa && service.items_ta && service.items_ta.length > 0 ? service.items_ta : service.items || []).length}) - தமிழ்`
+                    : `Included Variations / Stitched Items (${service.items?.length || 0})`}
                 </label>
                 
                 <div className="flex flex-wrap gap-1.5 min-h-[32px] p-2 bg-cream-50/70 border border-beige-200 rounded-xl">
-                  {(service.items || []).map((item, idx) => (
+                  {(isTa && service.items_ta && service.items_ta.length > 0 ? service.items_ta : service.items || []).map((item, idx) => (
                     <span
                       key={idx}
                       className="inline-flex items-center gap-1 text-[11px] font-medium bg-white text-studio-800 border border-beige-300 px-2 py-0.5 rounded-lg shadow-2xs"
@@ -424,7 +446,7 @@ export const AdminServices: React.FC = () => {
                       </button>
                     </span>
                   ))}
-                  {(!service.items || service.items.length === 0) && (
+                  {((isTa && service.items_ta ? service.items_ta.length === 0 : (!service.items || service.items.length === 0))) && (
                     <span className="text-[11px] text-studio-400 italic">No items added yet</span>
                   )}
                 </div>
@@ -443,7 +465,7 @@ export const AdminServices: React.FC = () => {
                         handleAddItem(service.id);
                       }
                     }}
-                    placeholder="Add variation (e.g. Silk Blouse) & press Enter"
+                    placeholder={isTa ? 'வகையை சேர்க்கவும் (எ.கா: பட்டு பாவாடை) & Enter அழுத்தவும்' : 'Add variation (e.g. Silk Blouse) & press Enter'}
                     className="flex-1 px-3 py-1.5 rounded-xl border border-beige-300 text-xs focus:outline-none focus:ring-1 focus:ring-gold-400"
                   />
                   <button

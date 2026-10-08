@@ -8,6 +8,67 @@
     scroll-behavior: smooth;
   }
 
+  body {
+    /* Enhanced global typography for clear, breathable reading */
+    letter-spacing: 0.02em;
+    word-spacing: 0.12em;
+    line-height: 1.72;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Specific typography enhancements for Tamil */
+  [lang="ta"], .lang-ta {
+    font-family: "Mukta Malar", "Noto Sans Tamil", system-ui, -apple-system, sans-serif;
+    letter-spacing: 0.015em;
+    word-spacing: 0.18em;
+    line-height: 1.85;
+  }
+
+  /* Specific typography enhancements for English */
+  [lang="en"], .lang-en {
+    font-family: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+    letter-spacing: 0.025em;
+    word-spacing: 0.12em;
+    line-height: 1.72;
+  }
+
+  /* Signature Brand Name & Playfair Display serif font — preserved across BOTH Tamil & English */
+  .brand-name,
+  .font-brand,
+  [data-brand-name] {
+    font-family: "Playfair Display", Georgia, serif !important;
+  }
+
+  /* Headings: never squish wrapped lines; give breathing space */
+  h1, h2, h3, h4, h5, h6 {
+    line-height: 1.45;
+    word-spacing: 0.12em;
+  }
+
+  [lang="ta"] h1:not(.brand-name),
+  [lang="ta"] h2:not(.brand-name),
+  [lang="ta"] h3:not(.brand-name),
+  [lang="ta"] h4:not(.brand-name),
+  .lang-ta h1:not(.brand-name),
+  .lang-ta h2:not(.brand-name),
+  .lang-ta h3:not(.brand-name),
+  .lang-ta h4:not(.brand-name) {
+    line-height: 1.62;
+    word-spacing: 0.18em;
+    letter-spacing: 0.01em;
+  }
+
+  /* Ensure paragraphs and list items maintain readable line-height */
+  p, li {
+    line-height: 1.75;
+  }
+
+  [lang="ta"] p, [lang="ta"] li,
+  .lang-ta p, .lang-ta li {
+    line-height: 1.88;
+  }
+
   /* ── Dark mode base token overrides ── */
   .dark {
     --bg-base: #0f0a07;

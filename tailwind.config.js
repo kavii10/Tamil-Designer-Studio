@@ -48,8 +48,9 @@ export default {
         },
       },
       fontFamily: {
-        serif: ['"Playfair Display"', 'Georgia', 'serif'],
-        sans: ['"Plus Jakarta Sans"', 'Inter', 'system-ui', 'sans-serif'],
+        serif: ['"Playfair Display"', '"Mukta Malar"', 'Georgia', 'serif'],
+        sans: ['"Plus Jakarta Sans"', '"Noto Sans Tamil"', '"Mukta Malar"', 'Inter', 'system-ui', 'sans-serif'],
+        tamil: ['"Mukta Malar"', '"Noto Sans Tamil"', 'system-ui', 'sans-serif'],
       },
       boxShadow: {
         'subtle': '0 2px 10px -2px rgba(45, 30, 24, 0.05)',

@@ -1,18 +1,25 @@
 import React, { useState } from 'react';
 import { CheckCircle2, ChevronDown, ChevronUp, Image as ImageIcon } from 'lucide-react';
 import { ServiceItem } from '../../types';
+import { Lang } from '../../i18n/translations';
 
 interface ServiceCardProps {
   service: ServiceItem;
   isDark?: boolean;
+  lang?: Lang;
 }
 
-export const ServiceCard: React.FC<ServiceCardProps> = ({ service, isDark = false }) => {
+export const ServiceCard: React.FC<ServiceCardProps> = ({ service, isDark = false, lang = 'en' }) => {
   const [imgError, setImgError] = useState(false);
   const [showAllItems, setShowAllItems] = useState(false);
 
+  const isTa = lang === 'ta';
+  const displayTitle = (isTa && service.title_ta) ? service.title_ta : service.title;
+  const displayDescription = (isTa && service.description_ta) ? service.description_ta : service.description;
+  const rawItems = (isTa && service.items_ta && service.items_ta.length > 0) ? service.items_ta : service.items || [];
+
   const hasImage = service.image_url && !imgError;
-  const items = service.items || [];
+  const items = rawItems;
   const visibleItems = showAllItems ? items : items.slice(0, 4);
 
   return (
@@ -28,7 +35,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({ service, isDark = fals
           {hasImage ? (
             <img
               src={service.image_url}
-              alt={service.title}
+              alt={displayTitle}
               className="w-full h-full object-cover object-top"
               onError={() => setImgError(true)}
             />
@@ -36,7 +43,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({ service, isDark = fals
             <div className="w-full h-full flex flex-col items-center justify-center gap-2 p-4 text-center">
               <ImageIcon className={`w-8 h-8 ${isDark ? 'text-[#48445C]' : 'text-[#D9C8AD]'}`} />
               <span className={`text-xs font-medium ${isDark ? 'text-[#68637F]' : 'text-[#A89880]'}`}>
-                {service.title}
+                {displayTitle}
               </span>
             </div>
           )}
@@ -55,44 +62,46 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({ service, isDark = fals
         <div className="flex flex-col flex-1 p-5 space-y-3.5">
           {/* Title */}
           <h4
-            className={`font-serif font-bold text-base leading-snug transition-colors ${
+            className={`font-serif font-bold text-base sm:text-lg leading-relaxed sm:leading-loose tracking-normal [word-spacing:0.14em] transition-colors ${
               isDark
                 ? 'text-[#FAF6EE] group-hover:text-[#E8BE56]'
                 : 'text-[#2A170E] group-hover:text-[#B8861B]'
             }`}
           >
-            {service.title}
+            {displayTitle}
           </h4>
 
           {/* Description */}
-          <p className={`text-xs leading-relaxed ${isDark ? 'text-[#A7A2B8]' : 'text-[#6B5344]'}`}>
-            {service.description}
-          </p>
+          {displayDescription && (
+            <p className={`text-xs sm:text-[13px] leading-relaxed sm:leading-loose [word-spacing:0.12em] ${isDark ? 'text-[#A7A2B8]' : 'text-[#6B5344]'}`}>
+              {displayDescription}
+            </p>
+          )}
 
           {/* Items list */}
           {items.length > 0 && (
-            <div className="space-y-2 pt-1">
+            <div className="space-y-2.5 pt-1">
               <div
-                className={`text-[10px] font-bold uppercase tracking-wider ${
+                className={`text-xs font-bold uppercase tracking-wide [word-spacing:0.1em] ${
                   isDark ? 'text-[#8E899E]' : 'text-[#9B7120]'
                 }`}
               >
-                Included Variations
+                {isTa ? 'சேர்க்கப்பட்டுள்ள வகைகள்' : 'Included Variations'}
               </div>
-              <ul className="space-y-1.5">
+              <ul className="space-y-2 sm:space-y-2.5">
                 {visibleItems.map((item) => (
                   <li
                     key={item}
-                    className={`flex items-center gap-2 text-xs font-medium ${
+                    className={`flex items-start gap-2 text-xs sm:text-[13px] font-medium leading-relaxed sm:leading-loose [word-spacing:0.12em] ${
                       isDark ? 'text-[#C5BFD5]' : 'text-[#4E3622]'
                     }`}
                   >
                     <CheckCircle2
-                      className={`w-3.5 h-3.5 shrink-0 ${
+                      className={`w-4 h-4 shrink-0 mt-0.5 ${
                         isDark ? 'text-[#E8BE56]' : 'text-[#B8861B]'
                       }`}
                     />
-                    <span>{item}</span>
+                    <span className="leading-relaxed sm:leading-loose">{item}</span>
                   </li>
                 ))}
               </ul>
@@ -107,11 +116,11 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({ service, isDark = fals
                 >
                   {showAllItems ? (
                     <>
-                      Show Less <ChevronUp className="w-3.5 h-3.5" />
+                      {isTa ? 'குறைவாகக் காட்டு' : 'Show Less'} <ChevronUp className="w-3.5 h-3.5" />
                     </>
                   ) : (
                     <>
-                      +{items.length - 4} More <ChevronDown className="w-3.5 h-3.5" />
+                      +{items.length - 4} {isTa ? 'மேலும்' : 'More'} <ChevronDown className="w-3.5 h-3.5" />
                     </>
                   )}
                 </button>
@@ -126,7 +135,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({ service, isDark = fals
             }`}
           >
             <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
-            <span>Bespoke &amp; Tailor Made · All Sizes</span>
+            <span>{isTa ? 'தனிப்பயன் தையல் · அனைத்து அளவுகள்' : 'Bespoke & Tailor Made · All Sizes'}</span>
           </div>
         </div>
       </div>

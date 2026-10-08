@@ -53,9 +53,11 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
         </div>
 
         {/* Security Notice */}
-        <div className="p-3 rounded-2xl bg-gold-50/70 border border-gold-200/80 text-xs text-gold-900 flex items-center gap-2.5">
-          <ShieldCheck className="w-4 h-4 text-gold-700 shrink-0" />
-          <span>Protected Area: Enter the admin security passcode to manage studio settings, QR destinations, and academy courses.</span>
+        <div className="p-3.5 rounded-2xl bg-gold-50/80 border border-gold-300 text-xs text-gold-950 flex items-start gap-2.5 shadow-2xs">
+          <ShieldCheck className="w-4 h-4 text-gold-700 shrink-0 mt-0.5" />
+          <span>
+            <strong>Strict Passcode Verification:</strong> For security across all mobile devices, tablets, and PCs, the admin passcode is strictly required on every access to unlock studio management.
+          </span>
         </div>
 
         {error && (
