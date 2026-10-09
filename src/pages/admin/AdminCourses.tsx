@@ -115,7 +115,12 @@ export const AdminCourses: React.FC<AdminCoursesProps> = ({
         ]);
         const draft = readCourseDraft();
         if (!coursesDirtyRef.current) {
-          setCourses(draft?.courses || loadedCourses);
+          const draftCourses = draft?.courses?.map((course) =>
+            course.id.startsWith('course-')
+              ? { ...course, id: crypto.randomUUID() }
+              : course
+          );
+          setCourses(draftCourses || loadedCourses);
           if (draft?.courses) {
             coursesDirtyRef.current = true;
             setCoursesDirty(true);
@@ -395,7 +400,7 @@ export const AdminCourses: React.FC<AdminCoursesProps> = ({
   const handleAddNewCourse = () => {
     markCoursesDirty();
     const newCourse: CourseItem = {
-      id: 'course-' + Date.now(),
+      id: crypto.randomUUID(),
       title: 'New Masterclass Course',
       level: 'Specialized',
       badge: 'Certified',
