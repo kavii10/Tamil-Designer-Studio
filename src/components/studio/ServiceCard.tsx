@@ -135,7 +135,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({ service, isDark = fals
             }`}
           >
             <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
-            <span>{isTa ? 'தனிப்பயன் தையல் · அனைத்து அளவுகள்' : 'Bespoke & Tailor Made · All Sizes'}</span>
+            <span>{isTa ? 'தையல் · அனைத்து அளவுகளிலும்' : 'Bespoke & Tailor Made · All Sizes'}</span>
           </div>
         </div>
       </div>

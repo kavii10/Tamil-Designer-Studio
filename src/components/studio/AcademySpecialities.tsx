@@ -38,7 +38,7 @@ export const AcademySpecialities: React.FC<AcademySpecialitiesProps> = ({
               </h3>
               <p className={`text-xs sm:text-[13px] mt-1 leading-relaxed [word-spacing:0.12em] ${isDark ? 'text-[#A7A2B8]' : 'text-[#7C6556]'}`}>
                 {isTa
-                  ? 'எங்களிடம் ஃபேஷன் டிசைனிங் கற்பது ஏன் தனித்துவமானது, விரைவானது மற்றும் உங்கள் விருப்பத்திற்கேற்ப வடிவமைக்கப்பட்டது'
+                  ? 'எங்களிடம் ஃபேஷன் டிசைனிங் கற்பது தனித்துவமானது, விரைவானது மற்றும் உங்கள் விருப்பத்திற்கேற்ப வடிவமைக்கப்பட்டது'
                   : 'Why learning fashion designing with us is unique, faster, and tailored for you'}
               </p>
             </div>
@@ -129,7 +129,7 @@ export const AcademySpecialities: React.FC<AcademySpecialitiesProps> = ({
               <p className="leading-relaxed sm:leading-loose">
                 {isTa ? (
                   <>
-                    உங்களுக்கு <strong className={isDark ? 'text-[#FAF6EE]' : 'text-[#160E07]'}>பிளவுஸ்</strong> மற்றும் <strong className={isDark ? 'text-[#FAF6EE]' : 'text-[#160E07]'}>குர்தி வகைகள்</strong> மட்டுமே கற்க வேண்டும் என்றால், அந்தப் பாடப் பிரிவுகளை மட்டும் தேர்வு செய்து படிக்கலாம்.
+                    உங்களுக்கு <strong className={isDark ? 'text-[#FAF6EE]' : 'text-[#160E07]'}>பிளவுஸ்</strong> மற்றும் <strong className={isDark ? 'text-[#FAF6EE]' : 'text-[#160E07]'}>குர்த்தி வகைகள்</strong> மட்டுமே கற்க வேண்டும் என்றால், அந்தப் பாடப் பிரிவுகளை மட்டும் தேர்வு செய்து படிக்கலாம்.
                   </>
                 ) : (
                   <>
@@ -145,7 +145,7 @@ export const AcademySpecialities: React.FC<AcademySpecialitiesProps> = ({
                 <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-1" />
                 <span className={`leading-relaxed sm:leading-loose ${isDark ? 'text-[#D1CADB]' : 'text-[#5C4535]'}`}>
                   {isTa
-                    ? 'தனித்தனி பாடப் பிரிவுகளை தேர்வு செய்யலாம் (பிளவுஸ், குர்தி, பேண்ட், மேக்ஸி கவுன் அல்லது வெஸ்டர்ன் ஆடைகள்)'
+                    ? 'தனித்தனி பாடப் பிரிவுகளை தேர்வு செய்யலாம் (பிளவுஸ், குர்த்தி, பேண்ட், மேக்ஸி கவுன் அல்லது வெஸ்டர்ன் ஆடைகள்)'
                     : 'Choose individual modules (Blouses, Kurtis, Pants, Maxi Gowns, or Western)'}
                 </span>
               </li>
@@ -153,7 +153,7 @@ export const AcademySpecialities: React.FC<AcademySpecialitiesProps> = ({
                 <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-1" />
                 <span className={`leading-relaxed sm:leading-loose ${isDark ? 'text-[#D1CADB]' : 'text-[#5C4535]'}`}>
                   {isTa
-                    ? 'உங்கள் பொட்டிக் தேவைக்கு மட்டும் கவனம் செலுத்துவதன் மூலம் நேரத்தையும் பணத்தையும் மிச்சப்படுத்துங்கள்'
+                    ? 'உங்கள் தையல் கடை தேவைக்கு மட்டும் கவனம் செலுத்துவதன் மூலம் நேரத்தையும் பணத்தையும் மிச்சப்படுத்துங்கள்'
                     : 'Save time & money by focusing only on your boutique requirements'}
                 </span>
               </li>
@@ -265,7 +265,7 @@ export const AcademySpecialities: React.FC<AcademySpecialitiesProps> = ({
                 <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-1" />
                 <span className={`leading-relaxed sm:leading-loose ${isDark ? 'text-[#D1CADB]' : 'text-[#5C4535]'}`}>
                   {isTa
-                    ? 'தொழில்முறை பொட்டிக் & கார்மென்ட்ஸ் தரத்திலான தையல் ஃபினிஷிங் மற்றும் வேகத்தை உடனடியாக அடையுங்கள்'
+                    ? 'தொழில்முறை தையல் கடை & கார்மென்ட்ஸ் தரத்திலான தையல் ஃபினிஷிங் மற்றும் வேகத்தை உடனடியாக அடையுங்கள்'
                     : 'Attain professional boutique & factory-level finish and speed immediately'}
                 </span>
               </li>
